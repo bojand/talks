@@ -6,5 +6,5 @@
 
 #### Fredericton, NB
 
-**Introduction to Node.js**
+##### Introduction to Node.js
 Wednesday, May 25, 2016
