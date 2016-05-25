@@ -273,7 +273,7 @@ _[1 minutes]_
 
 ### Events
 
-Much of the Node.js API is built around an asynchronous event-driven architecture in which "emitters" periodically emit named events that cause "listeners" to be called.
+* Much of the Node.js API is built around an asynchronous event-driven architecture in which "emitters" periodically emit named events that cause "listeners" to be called.
 
 ```js
 const EventEmitter = require('events');
@@ -841,6 +841,25 @@ test('POST /users', async t => {
 
 NOTES:
 _[3 minutes]_
+
+=====
+
+### Debugging
+
+* Node Inspector is the main debugging tool for Node.js applications.
+
+```sh
+$ npm install -g node-inspector
+$ node-debug app.js
+```
+
+### Profiling
+
+- `$ node --prof app.js`
+- `heapdump` and `memwatch` tools
+
+NOTES:
+_[2 minutes]_
 
 =====
 
