@@ -15,6 +15,13 @@ FDUG May 25, 2016
 * Asynchronous I/O
 * Single threaded model
 
+NOTES:
+_[1 minutes]_
+
+- Server side JS. Some people believe JS doesn't belong on the server, but too bad.
+- Single threaded. Weird for people coming from other platforms. There are modules such as the native module
+  `cluster` that enable parallelism.
+
 =====
 
 ### Who uses Node.js
@@ -58,6 +65,9 @@ FDUG May 25, 2016
 NOTES:
 _[1 minutes]_
 
+- Medium. Initially all in Node. Now most of the main services still in Node, with some auxiliary services in Go.
+- Voxer.io.
+
 =====
 
 Platforms
@@ -87,6 +97,13 @@ Platforms
 	</tr>
 </table>
 
+NOTES:
+_[1 minutes]_
+
+- Tessel - open source board similar to Arduino or Raspberry Pi, with native Node.js built in.
+- Electron - Open Source Node.js framework to target desktop environments. Atom, Slack among others.
+- Also able to target Arduino, Raspberry Pi, drones, and others using Cylon.js or JohnnyFive.
+
 =====
 
 ### Node.js Architecture Overview
@@ -95,6 +112,10 @@ Platforms
 
 NOTES:
 _[1 minutes]_
+
+- libuv, multiplatform C library that supports the evented, asynchronous I/O architecture of Node.js
+- V8 - Google Javascript Engine (in C++) that executes the code
+- Experimental support for ChakraCore, and Spider Monkey
 
 =====
 
@@ -156,6 +177,9 @@ _[1 minutes]_
 
 <img src="./img/npm-install.gif" style="border:none" alt="npm install" />
 
+NOTES:
+_[1 minutes]_
+
 =====
 
 ### nvm
@@ -173,6 +197,8 @@ _[1 minutes]_
 
 NOTES:
 _[1 minutes]_
+
+- read–eval–print loop
 
 =====
 
@@ -241,7 +267,7 @@ Much of the Node.js API is built around an asynchronous event-driven architectur
 const EventEmitter = require('events');
 class MyEmitter extends EventEmitter {}
 const myEmitter = new MyEmitter();
-myEmitter.on('event', () => {
+myEmitter.on('event', function () {
   console.log('an event occurred!');
 });
 myEmitter.emit('event');
@@ -249,6 +275,9 @@ myEmitter.emit('event');
 
 NOTES:
 _[1 minutes]_
+
+- This code is actually synchronous, and it all happens on a single tick.
+- In reality most events occur in asynchronous contexts.
 
 =====
 
@@ -279,7 +308,9 @@ $
 ```
 
 NOTES:
-_[1 minutes]_
+_[2 minutes]_
+
+- Important to notice the flow and order of execution
 
 =====
 
@@ -310,7 +341,10 @@ $
 ```
 
 NOTES:
-_[1 minutes]_
+_[2 minutes]_
+
+- Important to notice the flow and order of execution
+- LevelDB is a simple key/value data store built by Google, inspired by BigTable. It's used in Google Chrome and many other products. Data is sorted by key. It supports batching writes, forward and backward iteration. It's got lots of nice features like streaming API which makes it a good fit for use with Node.js Think of it as a NoSQL key-value based SQLite.
 
 =====
 
@@ -333,7 +367,10 @@ readableStream.on('end', function () {
 ```
 
 NOTES:
-_[1 minutes]_
+_[2 minutes]_
+
+- Problem with file example earlier? We have to wait and read whole file into memory before we can do anything with it.
+- Extending on events, streams are an integral aspect of Node.js.
 
 =====
 
@@ -350,7 +387,7 @@ _[1 minutes]_
 	- Specialized Duplex stream where the output is computed from input
 
 NOTES:
-	_[1 minutes]_
+	_[2 minutes]_
 
 =====
 
@@ -451,9 +488,9 @@ server.listen(8000);
 ```
 
 NOTES:
-_[1 minutes]_
+_[2 minutes]_
 
-- res.end() ... we've seen that before. `res` is just a stream. We can do better.
+- `res` is just a stream. We can do better.
 
 =====
 
@@ -491,7 +528,14 @@ app.listen(3000, function () {
 ```
 
 NOTES:
-_[1 minutes]_
+_[2 minutes]_
+
+- Express is the de facto web framework for Node.js applications.
+- Others:
+  * Restify
+  * Sails.js. Built on top of Express.
+  * Kraken, et al. From PayPal. Built on top of Express.
+  * Koa.js. Next generation, ES6 version of Express.
 
 =====
 
@@ -524,11 +568,12 @@ app.get('/hello/:name', function (req, res) {
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!');
 });
-
 ```
 
 NOTES:
-_[1 minutes]_
+_[3 minutes]_
+
+- Express has a concept of middleware that are just functions that can be hooked up as layers within request - response cycle.
 
 =====
 
@@ -540,6 +585,9 @@ Example app listening on port 3000!
 GET /hello/Dave Request ID: 43b9638e-ce1e-49cb-8a5a-a659e5c47fb8
 GET /hello/Kate Request ID: c30531d6-1a3c-47b7-b72c-bff2c5d3bc12
 ```
+
+NOTES:
+_[1 minutes]_
 
 =====
 
@@ -554,6 +602,9 @@ GET /hello/Kate Request ID: c30531d6-1a3c-47b7-b72c-bff2c5d3bc12
 * Data validation
 * Compression
 * Security, CORS
+
+NOTES:
+_[1 minutes]_
 
 =====
 
@@ -659,6 +710,8 @@ exports.list = function (req, res, next) {
 NOTES:
 _[5 minutes]_
 
+- Demo
+
 =====
 
 ### Reading streams client-side
@@ -686,6 +739,7 @@ NOTES:
 _[3 minutes]_
 
 - We can asynchronously render data in browser as it becomes available.
+- You can imagine how this can be hooked up to React / Redux to add components for items as they become available.
 
 =====
 
@@ -708,6 +762,7 @@ _[3 minutes]_
 	- synchronous execution
 	- Use any assertion library
 * Jest
+  - From Facebook
 	- Jasmine for assertions
 	- atomic tests
 	- async and sync
@@ -771,3 +826,10 @@ test('POST /users', async t => {
   t.deepEqual(res.body, data);
 });
 ```
+
+NOTES:
+_[3 minutes]_
+
+=====
+
+### Questions?
