@@ -60,6 +60,17 @@ _[1 minutes]_
 			<img src="./img/uber.png" style="width:200px;height:auto;border:none" alt="Uber" />
 		</td>
 	</tr>
+  <tr style="border:none">
+		<td style="border:none">
+			<img src="./img/medium.png" style="width:200px;height:auto;border:none" alt="Medium" />
+		</td>
+		<td style="border:none">
+			<img src="./img/storify.jpeg" style="width:200px;height:auto;border:none" alt="Storify" />
+		</td>
+		<td style="border:none">
+			<img src="./img/trello.png" style="width:200px;height:auto;border:none" alt="Trello" />
+		</td>
+	</tr>
 </table>
 
 NOTES:
@@ -67,6 +78,7 @@ _[1 minutes]_
 
 - Medium. Initially all in Node. Now most of the main services still in Node, with some auxiliary services in Go.
 - Voxer.io.
+- Klout
 
 =====
 
