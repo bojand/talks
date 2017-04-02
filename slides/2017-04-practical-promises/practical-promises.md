@@ -104,6 +104,23 @@ _[1 minutes]_
 
 =====
 
+### Benefits
+
+* More radable code
+* Forces consistent asynchronicity
+* Zalgo-safe
+* Callbacks can be called multiple times, Promise are resolved once
+* Allows for simpler, more efficient memoization implementations and patterns
+
+NOTES:
+_[3 minutes]_
+
+* Even though promises are usually ‘future’ data, once we actually have a promise we don’t need to care whether the data will be there in future, or it’s already been resolved. We call `then()` in either case. As such, promises force consistent asynchronicity 
+* Zalgo-sage - we do not need to care whther we are actually on the same tick or not
+* Simple memoization, we just need to cache the promise
+
+=====
+
 ### Creating a Promise
 
 ```js
