@@ -203,7 +203,7 @@ _[2 minutes]_
 
 =====
 
-### CHAIN, DON'T NEST
+### Chain, don't nest
 
 ```js
 function handler (params) {  
