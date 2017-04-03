@@ -114,7 +114,7 @@ _[2 minutes]_
 
 - Traditional Javascript
 - "Callback pyramid"
-- We can improve using async library. ie. async.waterfall
+- We can improve using async library. ie. `async.waterfall`
 
 =====
 
