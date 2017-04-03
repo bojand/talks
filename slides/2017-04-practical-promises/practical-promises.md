@@ -199,7 +199,7 @@ _[2 minutes]_
 - If we take our example code from earlier, and implement it using Promises and it looks nuch nicer
 - `then` method returns a `Promise` which allows for method chaining
 - Parameters automatically follow through
-- async.waterfall for free
+- `async.waterfall` for free
 
 =====
 
