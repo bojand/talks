@@ -35,6 +35,7 @@ _[1 minutes]_
 - Hello, my name is Bojan Djurkovic.
 - I am a Lead Software Engineer for Cvent. It's a company based out of Washington DC.
 - Coincidentally we make software for conferences, conventions and events not unlike this one.
+- I work mostly with Node.js, some React, and unfortunately some Java here and there.
 
 =====
 
@@ -67,11 +68,11 @@ NOTES:
 _[2 minutes]_
 
 - Promises have been in browser and Node for 2 years, yet I think there still seems to be this aversion or at least lack of will to adopt them and use them.
+- Bluebird and Q still popular Promise libraries, which just leads to fragmantation, which will only cause problems in future
+- Express still order of magnitude more popular than Koa, the Promise-based spiritual successor to Express.
 - This is due partly to technical reasons. Node core API is callback-based because maps nicely to underlying v8 platform, and so since it's the root API that everyone has to use, the paradigm carries through into the user land.
 - But Promise-based Node will come eventually.
 - Similarly `XHR` and ajax is event / callback based, and `fetch()` adoption lagging
-- Bluebird and Q still popular Promise libraries, which just leads to fragmantation, which will only cause problems in future
-- Express still order of magnitude more popular than Koa, the Promise-based spiritual successor to Express.
 - Technical and comminity issues
 
 =====
@@ -131,6 +132,7 @@ _[2 minutes]_
 - Promises can be resolved (or fulfilled) when the async action succeeds
 - Or it can be "rejected" when the action fails
 - A Promise has a `then` function that's executed when the promise is resolved
+- `then()` must take a function, and return either a Promise, a value (including implicid `undefined`) or throw.
 - `then()` can optionally hava a rejection handler
 - A Promise has a `catch` function that's called when rejected
 
@@ -636,8 +638,31 @@ NOTES:
 _[1 minutes]_
 
 - Executes just like it reads!
+- `await` can only be used within an `async` function
 - Here when we use `await` it really just means stop this function and wait for whatever Promise is on the right to be resolved
 - Event loop keeps on ticking servicing other functions, requests, whatever.
+
+=====
+
+### Benefits
+
+* Even more concise and cleaner code over Promises
+* Better error handling with normal try / catch
+* Intuitive handling of conditional logic
+* Better error stacks that points exactly to where the exception was thrown
+* Easier debugging, step through code as if it was synchronous
+
+NOTES:
+_[3 minutes]_
+
+- Even more concise and cleaner code over Promises
+- Better error handling with normal try / catch. Async/await makes it finally possible to handle both synchronous and asynchronous errors with the same construct, good old try/catch.
+- Intuitive handling of conditional logic. We can just use normal if / else contrcuts
+- Better error stacks that points exactly to where the exception was thrown
+- Easier debugging
+  - With Promises you can’t set breakpoints in arrow functions that return expressions (no body)
+  - If you set a breakpoint inside a .then block and use debug shortcuts like step-over, the debugger will not move to the the following .then because it only “steps” through synchronous code
+  - With async/await you don’t need arrow functions as much, and you can step through await calls exactly as if they were normal synchronous calls.
 
 =====
 
@@ -665,6 +690,7 @@ NOTES:
 _[1 minutes]_
 
 - Some common pitfalls when using async functions
+- It makes asynchronous code less obvious
 - Not using `await`. If we don't use it we get just the Promise. Sometime this is useful. But it can also be a cause of bugs and issues.
 - `await`-ing multiple values in a row is not very efficient. 
 - We have to wait for first call to finish before doing the 2nd one. 
