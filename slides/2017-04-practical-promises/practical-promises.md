@@ -425,12 +425,19 @@ _[1 minutes]_
 
 ### Providing an API: Options
 
-* Do nothing and let client convert it how they want to
-* Provide a Promisified version of module separately. ie. `foo-lib-async`
-* Separate callback and Promisified functions within a single module `foo-lib`
-* Single API that determines the mechanism at run time based on invocation
-  - If callback provided return via callback
-  - If no callback, return Promise
+<section>
+  <ul>
+    <li class="fragment fade-in">Do nothing and let client convert it how they want to</li>
+    <li class="fragment fade-in">Provide a Promisified version of module separately. ie. `foo-lib-async`</li>
+    <li class="fragment fade-in">Separate callback and Promisified functions within a single module `foo-lib`</li>
+    <li class="fragment fade-in">Single API that determines the mechanism at run time based on invocation
+      <ul>
+        <li>If callback provided return via callback</li>
+        <li>If no callback, return Promise</li>
+      <ul>
+    </li>
+  </ul>
+</section>
 
 NOTES:
 _[2 minutes]_
