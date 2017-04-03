@@ -1,6 +1,11 @@
 # Practical 
 # Promises
 
+NOTES:
+_[1 minutes]_
+
+- Thank the organizers and the audience
+
 =====
 
 ### package.json
@@ -27,6 +32,10 @@
 NOTES:
 _[1 minutes]_
 
+- Hello, my name is Bojan Djurkovic.
+- I am a Lead Software Engineer for Cvent. It's a company based out of Washington DC.
+- Coincidentally we make software for conferences, conventions and events not unlike this one.
+
 =====
 
 ### Thesis
@@ -40,7 +49,7 @@ _[1 minutes]_
 NOTES:
 _[2 minutes]_
 
-- Promises are nothing new or revolutionary. Other languages have had them for a while.
+- Promises are nothing new or revolutionary. Other languages have had them for a while. 
 - But in my opinion they are important for the Javascript ecosystem
 - They are a path to a better future for the language 
 - This talk will cover mostly some of the tips and tricks and code
@@ -51,18 +60,19 @@ _[2 minutes]_
 ### Why this talk? Why now?
 
 * Promises have been in browser and Node for 2 years
-* Most devs still prefer callbacks
+* Most developers still prefer callbacks
 * Modules with Promise based API's are still an exception
 
 NOTES:
 _[2 minutes]_
 
-* Node core API is still Prmose-based and maps nicely to underlying v8 platform
-* `XHR` is callback based, and `fetch()` adoption lagging
-* Bluebird and Q still popular Promise libraries, which just leads to fragmantation
-* Also async / await only works with native Promises
-* Express still order of magnitude more popular than Koa, the Promise-based spiritual successor to Express.
-* Technical and comminity issue
+- Promises have been in browser and Node for 2 years, yet I think there still seems to be this aversion or at least lack of will to adopt them and use them.
+- This is due partly to technical reasons. Node core API is callback-based because maps nicely to underlying v8 platform, and so since it's the root API that everyone has to use, the paradigm carries through into the user land.
+- But Promise-based Node will come eventually.
+- Similarly `XHR` and ajax is event / callback based, and `fetch()` adoption lagging
+- Bluebird and Q still popular Promise libraries, which just leads to fragmantation, which will only cause problems in future
+- Express still order of magnitude more popular than Koa, the Promise-based spiritual successor to Express.
+- Technical and comminity issues
 
 =====
 
@@ -77,7 +87,7 @@ NOTES:
 _[2 minutes]_
 
 - Callbacks are the building blocks of all asynchronous operations in Javascript.
-- All other primitives and mechanisms are implemented using callbacks.
+- All other primitives and mechanisms, such as Timers, are implemented using callbacks.
 - EventEmitters and Streams are only available in Node.js
 
 =====
@@ -115,15 +125,18 @@ _[2 minutes]_
 * Have a `catch` function that's called when rejected
 
 NOTES:
-_[1 minutes]_
+_[2 minutes]_
 
-- Quick overview of what's a Promise
-- Resolved also called "fulfilled"
+- Just a quick overview of what's a Promise. It's a special Javascript object that represents some future value of computation.
+- Promises can be resolved (or fulfilled) when the async action succeeds
+- Or it can be "rejected" when the action fails
+- A Promise has a `then` function that's executed when the promise is resolved
 - `then()` can optionally hava a rejection handler
+- A Promise has a `catch` function that's called when rejected
 
 =====
 
-### Benefits
+### Some benefits
 
 * More radable code
 * Forces consistent asynchronicity
@@ -134,9 +147,11 @@ _[1 minutes]_
 NOTES:
 _[3 minutes]_
 
-* Even though promises are usually ‘future’ data, once we actually have a promise we don’t need to care whether the data will be there in future, or it’s already been resolved. We call `then()` in either case. As such, promises force consistent asynchronicity 
-* Zalgo-sage - we do not need to care whther we are actually on the same tick or not
-* Simple memoization, we just need to cache the promise
+- Usage of Promises can result in more readable code.
+- Your code will become smaller, more elegant, and easier to reason about. 
+- Even though promises are usually ‘future’ data, once we actually have a promise we don’t need to care whether the data will be there in future, or it’s already been resolved. We call `then()` in either case. As such, promises force consistent asynchronicity 
+- Zalgo-safe - we do not need to care whther we are actually on the same tick or not
+- Simple memoization, we just need to cache the promise
 
 =====
 
@@ -179,9 +194,10 @@ function handler (params) {
 NOTES:
 _[2 minutes]_
 
-- Much nicer
+- If we take our example code from earlier, and implemented using Promises is looks nuch nicer
 - `then` method returns a `Promise` which allows for method chaining
-- Params automatically follow through
+- Parameters automatically follow through
+- async.waterfall for free
 
 =====
 
@@ -205,6 +221,8 @@ function handler (params) {
 NOTES:
 _[2 minutes]_
 
+- This is effectively the same code, but it defeats the purpoce
+
 =====
 
 ### Promise.resolve()
@@ -220,6 +238,8 @@ p1.then(str => {
 
 NOTES:
 _[1 minutes]_
+
+- Useful for wrapping anything into a Promise
 
 =====
 
@@ -246,6 +266,8 @@ Error: Boom!
 
 NOTES:
 _[1 minutes]_
+
+- `reject()` does not need to take an Error
 
 =====
 
@@ -276,6 +298,9 @@ callAPI()
 
 * `then` error handler is optional
 
+NOTES:
+_[1 minutes]_
+
 =====
 
 ### Promise.all() for parallel tasks
@@ -300,6 +325,7 @@ NOTES:
 _[1 minutes]_
 
 - Tasks are promise returning functions
+- `Promise.all([ ... ])` waits for all fulfillments (or the first rejection)
 - Note that you can pass just a primitive value to the array and it will be resolved
 
 =====
@@ -356,6 +382,11 @@ doTask()
 	.then(alwaysRun2())
 ```
 
+NOTES:
+_[1 minutes]_
+
+- Here we use the conditional to resolve on it and nest the rest of the conditional logic behind it
+
 =====
 
 ### Promisifying
@@ -380,6 +411,14 @@ fsAsync.readFile('package.json', 'utf8').then(data => {
 })
 ```
 
+NOTES:
+_[1 minutes]_
+
+- Promisifying is the mechanism of converting callback style functions into Promise returning ones
+- There are many utilities and libraries that already exist to help with this goal
+- I prefer `pify` it's nice and simple
+- We can promisify just a single function, or a whole module
+
 =====
 
 ### Providing an API: Options
@@ -387,14 +426,21 @@ fsAsync.readFile('package.json', 'utf8').then(data => {
 * Do nothing and let client convert it how they want to
 * Provide a Promisified version of module separately. ie. `foo-lib-async`
 * Separate callback and Promisified functions within a single module `foo-lib`
-* Single API that determines the mechanism at run time based on params
+* Single API that determines the mechanism at run time based on invocation
   - If callback provided return via callback
   - If no callback, return Promise
 
 NOTES:
 _[2 minutes]_
 
-- I prefer last approach
+- What are our options for providing a Promise based API for our module or library?
+- Of course we can do nothing. There is certainly nothing wrong with that. And the clinet can take the approach they prefer.
+- We can provide a complete separate library that exposes a Promise-based API only. For example our `foo-lib-async` or something.
+- We can provide both callback and Promise-based API's within the single module.
+- Or we can provide a single API that determines the mechanism at run time based on invocation
+  - If callback provided return via callback
+  - If no callback, return Promise
+- I prefer this last approach, but that's just a personal preference. I don't believe any single approach is necessarily better than the other.
 
 =====
 
@@ -437,6 +483,9 @@ module.exports = {
 NOTES:
 _[1 minutes]_
 
+- This is an example where we have a callback based implementation and we're converting it to allow both callbacks and Promises.
+- One negative of this single API approach is that the client has to explicitly set the callback even in cases where they do not care about the result. For example they have to explicitly pass a noop function, such as  _.noop or something similar.
+
 =====
 
 ### Single API 2
@@ -460,6 +509,8 @@ module.exports = {
 
 NOTES:
 _[1 minutes]_
+
+- This is an example where we have a Promise-based implementation and we're converting it to allow both callbacks and Promises.
 
 =====
 
@@ -487,6 +538,8 @@ pAll(tasts, {concurrency: 2})
 NOTES:
 _[1 minutes]_
 
+- One thing to note here is that we're actually passing an array of function tasks that when executed will return a Promise
+
 =====
 
 ### Mapping
@@ -512,6 +565,9 @@ pMap(sites, get, {concurrency: 2}).then(results => {
 NOTES:
 _[1 minutes]_
 
+- Similarly there is a `p-map` module for mapping. 
+- `got` is a Promise based HTTP module
+
 =====
 
 ### Use Native Promises
@@ -527,6 +583,15 @@ _[1 minutes]_
 NOTES:
 _[3 minutes]_
 
+- Native Promises are awesome for compatibility and future-proofness
+- Libraries like `bluebird` and `Q` mutate the constructor and add extras
+- There is a whole ecosystem of tiny functional modules for native Promises
+- https://github.com/wbinnssmith/awesome-promises
+- A note on performance... In the real world Promise implementation is unlikely your performance bottleneck
+- I can understand the argument that every tick counts, but in most practical scenarios there are more usually relevant performance considerations and issues.
+- Native Promises in Node 7 adn 8 are already pretty good (not as good as Bluebird) but they will only get faster
+- Async / await returns a native Promise no matter what implementation you use, so even if you use a 3rd party library, you will still only get a Native Promise.
+
 =====
 
 ### Async / Await
@@ -539,7 +604,12 @@ _[3 minutes]_
 NOTES:
 _[1 minutes]_
 
+- Which brings us to Async /await. 
 - Promises are just the necessary, not as elegant, stepping stone towards a better mechanism
+- In my opinion this is real exciting and _practical_ evolution of async Javascript
+* An `async` function returns a Promise
+* We use `await` on a Promise to wait for it be resolved or an exception thrown
+* Underneath they just act on Promises. Everything relevant to Promises still applies here.
 
 =====
 
@@ -560,10 +630,14 @@ async function main () {
 main()  // OK
 ```
 
-* Executes like it reads!
+* Executes just like it reads!
 
 NOTES:
 _[1 minutes]_
+
+- Executes just like it reads!
+- Here when we use `await` it really just means stop this function and wait for whatever Promise is on the right to be resolved
+- Event loop keeps on ticking servicing other functions, requests, whatever.
 
 =====
 
@@ -586,6 +660,15 @@ let [foo2, bar2] = await Promise.all([getFoo(), getBar()])
 ```
 
 * Not handling errors; use normal `try` and `catch`
+
+NOTES:
+_[1 minutes]_
+
+- Some common pitfalls when using async functions
+- Not using `await`. If we don't use it we get just the Promise. Sometime this is useful. But it can also be a cause of bugs and issues.
+- `await`-ing multiple values in a row is not very efficient. 
+- We have to wait for first call to finish before doing the 2nd one. 
+- Unless it's needed and the intention, use `Promise.all()`
 
 =====
 
@@ -614,6 +697,8 @@ main()
 NOTES:
 _[1 minutes]_
 
+- Doing equential async operations now becomes just a matter of using a for loop
+
 =====
 
 ### Concurrent execution
@@ -638,6 +723,8 @@ main()
 
 NOTES:
 _[1 minutes]_
+
+- We could also do for of on the promises array and push the values into a results array but I think this code is better
 
 =====
 
