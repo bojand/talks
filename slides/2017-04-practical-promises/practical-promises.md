@@ -3,6 +3,8 @@
 
 =====
 
+### package.json
+
 ```json
 {
   "name": "Bojan Djurkovic",
@@ -29,8 +31,8 @@ _[1 minutes]_
 
 ### Thesis
 
-* Promises are not special or revolutionary
-* Promises are important for Javascript
+* Promises are not really special or revolutionary
+* Promises are important and beneficial for Javascript
 * You should use them
 * Tips, tricks & lots of code
 * I am not an expert
@@ -39,11 +41,28 @@ NOTES:
 _[2 minutes]_
 
 - Promises are nothing new or revolutionary. Other languages have had them for a while.
-- Arguably they are not even "good" or "elegant"
 - But in my opinion they are important for the Javascript ecosystem
 - They are a path to a better future for the language 
-- This talk will cover mostly some of the tips and tricks
+- This talk will cover mostly some of the tips and tricks and code
 - I am not an expert. I have not implemented my own Promise library. Just lessons learned from a user.
+
+=====
+
+### Why this talk? Why now?
+
+* Promises have been in browser and Node for 2 years
+* Most devs still prefer callbacks
+* Modules with Promise based API's are still an exception
+
+NOTES:
+_[2 minutes]_
+
+* Node core API is still Prmose-based and maps nicely to underlying v8 platform
+* `XHR` is callback based, and `fetch()` adoption lagging
+* Bluebird and Q still popular Promise libraries, which just leads to fragmantation
+* Also async / await only works with native Promises
+* Express still order of magnitude more popular than Koa, the Promise-based spiritual successor to Express.
+* Technical and comminity issue
 
 =====
 
@@ -503,6 +522,7 @@ _[1 minutes]_
 * https://github.com/wbinnssmith/awesome-promises
 * In the real world Promise implementation is unlikely your performance bottleneck
 * Native Promises will only get faster
+* Async / await returns a native Promise no matter what implementation you use
 
 NOTES:
 _[3 minutes]_
