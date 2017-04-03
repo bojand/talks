@@ -1,5 +1,5 @@
-# Practical 
-# Promises
+## **PRACTICAL**
+## **PROMISES**
 
 NOTES:
 _[1 minutes]_
@@ -7,8 +7,6 @@ _[1 minutes]_
 - Thank the organizers and the audience
 
 =====
-
-### package.json
 
 ```json
 {
@@ -79,14 +77,19 @@ _[2 minutes]_
 
 ### Async Javascript
 
-* Callbacks
-* Timers
-* EventEmitter
-* Streams
+<section>
+  <ul>
+    <li class="fragment fade-in">Callbacks</li>
+    <li class="fragment fade-in">Timers</li>
+    <li class="fragment fade-in">EventEmitter</li>
+    <li class="fragment fade-in">Streams</li>
+  </ul>
+</section>
 
 NOTES:
-_[2 minutes]_
+_[1 minutes]_
 
+- What are the different mechanisms for performin asynchronous actions in Javascript?
 - Callbacks are the building blocks of all asynchronous operations in Javascript.
 - All other primitives and mechanisms, such as Timers, are implemented using callbacks.
 - EventEmitters and Streams are only available in Node.js
@@ -221,7 +224,7 @@ function handler (params) {
 ```
 
 NOTES:
-_[2 minutes]_
+_[1 minutes]_
 
 - This is effectively the same code, but it defeats the purpose
 
@@ -284,6 +287,10 @@ callAPI()
 ```
 
 * What happens if `handleResponse` or `handleError` crash?
+
+
+NOTES:
+_[1 minutes]_
 
 =====
 
@@ -367,6 +374,9 @@ doTask()
 	.then(alwaysRun2())
 ```
 
+NOTES:
+_[1 minutes]_
+
 =====
 
 ### Solution
@@ -440,7 +450,7 @@ _[1 minutes]_
 </section>
 
 NOTES:
-_[2 minutes]_
+_[3 minutes]_
 
 - What are our options for providing a Promise based API for our module or library?
 - Of course we can do nothing. Just provide a callback based API. There is certainly nothing wrong with that. And the client can take the approach they prefer.
