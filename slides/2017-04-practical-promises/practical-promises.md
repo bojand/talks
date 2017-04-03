@@ -223,7 +223,7 @@ function handler (params) {
 NOTES:
 _[2 minutes]_
 
-- This is effectively the same code, but it defeats the purpoce
+- This is effectively the same code, but it defeats the purpose
 
 =====
 
