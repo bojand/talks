@@ -427,9 +427,9 @@ _[1 minutes]_
 
 <section>
   <ul>
-    <li class="fragment fade-in">Do nothing and let client convert it how they want to</li>
-    <li class="fragment fade-in">Provide a Promisified version of module separately. ie. `foo-lib-async`</li>
-    <li class="fragment fade-in">Separate callback and Promisified functions within a single module `foo-lib`</li>
+    <li class="fragment fade-in">Do nothing</li>
+    <li class="fragment fade-in">Provide a promisified version of module separately. ie. `foo-lib-async`</li>
+    <li class="fragment fade-in">Separate callback and promisified functions within a single module `foo-lib`</li>
     <li class="fragment fade-in">Single API that determines the mechanism at run time based on invocation
       <ul>
         <li>If callback provided return via callback</li>
