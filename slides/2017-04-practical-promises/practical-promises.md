@@ -443,7 +443,7 @@ NOTES:
 _[2 minutes]_
 
 - What are our options for providing a Promise based API for our module or library?
-- Of course we can do nothing. There is certainly nothing wrong with that. And the clinet can take the approach they prefer.
+- Of course we can do nothing. Just provide a callback based API. There is certainly nothing wrong with that. And the client can take the approach they prefer.
 - We can provide a complete separate library that exposes a Promise-based API only. For example our `foo-lib-async` or something.
 - We can provide both callback and Promise-based API's within the single module.
 - Or we can provide a single API that determines the mechanism at run time based on invocation
