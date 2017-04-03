@@ -196,7 +196,7 @@ function handler (params) {
 NOTES:
 _[2 minutes]_
 
-- If we take our example code from earlier, and implemented using Promises is looks nuch nicer
+- If we take our example code from earlier, and implement it using Promises and it looks nuch nicer
 - `then` method returns a `Promise` which allows for method chaining
 - Parameters automatically follow through
 - async.waterfall for free
@@ -791,6 +791,8 @@ function handler (params) {
 
 NOTES:
 _[1 minutes]_
+
+- This is nicer, but it's _not great_. Still feels and looks a little awkward, and callbeck-y.
 
 =====
 
