@@ -33,7 +33,7 @@ _[1 minutes]_
 - Hello, my name is Bojan Djurkovic.
 - I am a Lead Software Engineer for Cvent. It's a company based out of Washington DC.
 - Coincidentally we make software for conferences, conventions and events not unlike this one.
-- I work mostly with Node.js, some React, and unfortunately some Java here and there.
+- I work mostly on server side with Node.js, some React, and unfortunately some Java here and there.
 
 =====
 
@@ -43,7 +43,6 @@ _[1 minutes]_
 * Promises are important and beneficial for Javascript
 * You should use them
 * Tips, tricks & lots of code
-* I am not an expert
 
 NOTES:
 _[2 minutes]_
@@ -51,8 +50,9 @@ _[2 minutes]_
 - Promises are nothing new or revolutionary. Other languages have had them for a while. 
 - But in my opinion they are important for the Javascript ecosystem
 - They are a path to a better future for the language 
-- This talk will cover mostly some of the tips and tricks and code
-- I am not an expert. I have not implemented my own Promise library. Just lessons learned from a user.
+- You should use them
+- This talk will cover mostly tips and tricks and include lots of code
+- I would not consider myself an expert or authority. I have not implemented my own Promise library. These are just lessons learned from a user.
 
 =====
 
@@ -75,28 +75,24 @@ _[2 minutes]_
 
 =====
 
-### Async Javascript
+### Traditional Async Javascript
 
-<section>
-  <ul>
-    <li class="fragment fade-in">Callbacks</li>
-    <li class="fragment fade-in">Timers</li>
-    <li class="fragment fade-in">EventEmitter</li>
-    <li class="fragment fade-in">Streams</li>
-  </ul>
-</section>
+* Callbacks
+* Timers
+* EventEmitter
+* Streams
 
 NOTES:
 _[1 minutes]_
 
-- What are the different mechanisms for performin asynchronous actions in Javascript?
+- What are the different mechanisms for performing asynchronous actions in Javascript?
 - Callbacks are the building blocks of all asynchronous operations in Javascript.
 - All other primitives and mechanisms, such as Timers, are implemented using callbacks.
 - EventEmitters and Streams are only available in Node.js
 
 =====
 
-### Traditinal Callback approach
+### Traditional callback approach
 
 ```js
 function handler (params, done) {  
@@ -117,6 +113,7 @@ _[2 minutes]_
 
 - Traditional Javascript
 - "Callback pyramid"
+- Duplicate error handling code
 - We can improve using async library. ie. `async.waterfall`
 
 =====
@@ -135,28 +132,9 @@ _[2 minutes]_
 - Promises can be resolved (or fulfilled) when the async action succeeds
 - Or it can be "rejected" when the action fails
 - A Promise has a `then` function that's executed when the promise is resolved
-- `then()` must take a function, and return either a Promise, a value (including implicid `undefined`) or throw.
+- `then()` must take a function that returns either a Promise, a value (including implicid `undefined`) or throw.
 - `then()` can optionally hava a rejection handler
 - A Promise has a `catch` function that's called when rejected
-
-=====
-
-### Some benefits
-
-* More radable code
-* Forces consistent asynchronicity
-* Zalgo-safe
-* Callbacks can be called multiple times, Promise are resolved once
-* Allows for simpler, more efficient memoization implementations and patterns
-
-NOTES:
-_[3 minutes]_
-
-- Usage of Promises can result in more readable code.
-- Your code will become smaller, more elegant, and easier to reason about. 
-- Even though promises are usually ‘future’ data, once we actually have a promise we don’t need to care whether the data will be there in future, or it’s already been resolved. We call `then()` in either case. As such, promises force consistent asynchronicity 
-- Zalgo-safe - we do not need to care whther we are actually on the same tick or not
-- Simple memoization, we just need to cache the promise
 
 =====
 
@@ -199,10 +177,29 @@ function handler (params) {
 NOTES:
 _[2 minutes]_
 
-- If we take our example code from earlier, and implement it using Promises and it looks nuch nicer
+- If we take our example code from earlier, and implement it using Promises and it looks much nicer
 - `then` method returns a `Promise` which allows for method chaining
-- Parameters automatically follow through
+- Parameters automatically flow through
 - `async.waterfall` for free
+
+=====
+
+### Some benefits
+
+* More radable code
+* Forces consistent asynchronicity
+* Zalgo-safe
+* Callbacks can be called multiple times, Promise are resolved once
+* Allows for simpler, more efficient memoization implementations and patterns
+
+NOTES:
+_[3 minutes]_
+
+- Usage of Promises can result in more readable code.
+- Your code will become smaller, more elegant, and easier to reason about. 
+- Even though promises are usually ‘future’ data, once we actually have a promise we don’t need to care whether the data will be there in future, or it’s already been resolved. We call `then()` in either case. As such, promises force consistent asynchronicity 
+- Zalgo-safe - we do not need to care whther we are actually on the same tick or not
+- Simple memoization, we just need to cache the promise
 
 =====
 
@@ -230,7 +227,7 @@ _[1 minutes]_
 
 =====
 
-### Promise.resolve()
+### `Promise.resolve()`
 
 * Use `Promise.resolve` to turn any value into a `Promise`
 
@@ -248,7 +245,7 @@ _[1 minutes]_
 
 =====
 
-### Promise.reject()
+### `Promise.reject()`
 
 ```js
 Promise.reject(new Error('Boom!'))
@@ -312,7 +309,7 @@ _[1 minutes]_
 
 =====
 
-### Promise.all() for parallel tasks
+### `Promise.all()` for parallel tasks
 
 ```js
 Promise.all([
@@ -339,7 +336,7 @@ _[1 minutes]_
 
 =====
 
-### Promise.race()
+### `Promise.race()`
 
 ```js
 Promise.race([
@@ -360,6 +357,8 @@ Promise.race([
 
 NOTES:
 _[1 minutes]_
+
+- `Promise.race([ ... ])` waits only for either the first fulfillment or rejection.
 
 =====
 
@@ -433,13 +432,12 @@ _[1 minutes]_
 
 =====
 
-### Providing an API: Options
-
 <section>
+  <h3>Providing an API: Options</h3>
   <ul>
     <li class="fragment fade-in">Do nothing</li>
     <li class="fragment fade-in">Provide a promisified version of module separately. ie. `foo-lib-async`</li>
-    <li class="fragment fade-in">Separate callback and promisified functions within a single module `foo-lib`</li>
+    <li class="fragment fade-in">Separate callback and promisified API within a single module `foo-lib`</li>
     <li class="fragment fade-in">Single API that determines the mechanism at run time based on invocation
       <ul>
         <li>If callback provided return via callback</li>
@@ -447,8 +445,8 @@ _[1 minutes]_
       <ul>
     </li>
   </ul>
-</section>
 
+<aside class="notes">
 NOTES:
 _[3 minutes]_
 
@@ -460,10 +458,12 @@ _[3 minutes]_
   - If callback provided return via callback
   - If no callback, return Promise
 - I prefer this last approach, but that's just a personal preference. I don't believe any single approach is necessarily better than the other.
+</aside>
+</section>
 
 =====
 
-### Separate API
+### Separate API in a single module
 
 ```js
 const pify = require('pify')
@@ -479,7 +479,7 @@ module.exports.fooAsync = pify(foo)
 NOTES:
 _[1 minutes]_
 
-* It's become a somehwat of custom to name the Promised-based functions in these cases with "Async" suffix
+* It has become a somehwat of custom to name the Promised-based functions in these cases with "Async" suffix
 
 =====
 
@@ -530,6 +530,8 @@ NOTES:
 _[1 minutes]_
 
 - This is an example where we have a Promise-based implementation and we're converting it to allow both callbacks and Promises.
+- Nodeify is used with the promise returned by `foo()`
+- if callback is not a function, promise is returned as-is, otherwise callback will be called when promise is resolved or rejected
 
 =====
 
@@ -540,12 +542,12 @@ _[1 minutes]_
 ```js
 const pAll = require('p-all')
 
-const tasts = [
-  () => task1(),
-  () => task2(),
-  () => task3(),
-  () => task4(),
-  () => task5()
+const tasks = [
+  task1,
+  task2,
+  task3,
+  task4,
+  task5
 ]
 
 pAll(tasts, {concurrency: 2})
@@ -558,6 +560,8 @@ NOTES:
 _[1 minutes]_
 
 - One thing to note here is that we're actually passing an array of function tasks that when executed will return a Promise
+- `Promise.all()` takes Promises
+- `p-all` takes functions
 
 =====
 
@@ -597,7 +601,7 @@ _[1 minutes]_
 * https://github.com/wbinnssmith/awesome-promises
 * In the real world Promise implementation is unlikely your performance bottleneck
 * Native Promises will only get faster
-* Async / await returns a native Promise no matter what implementation you use
+* `async` / `await` returns a native Promise no matter what implementation you use
 
 NOTES:
 _[3 minutes]_
@@ -608,12 +612,12 @@ _[3 minutes]_
 - https://github.com/wbinnssmith/awesome-promises
 - A note on performance... In the real world Promise implementation is unlikely your performance bottleneck
 - I can understand the argument that every tick counts, but in most practical scenarios there are more usually relevant performance considerations and issues.
-- Native Promises in Node 7 adn 8 are already pretty good (not as good as Bluebird) but they will only get faster
+- Native Promises in Node 7 and 8 are already pretty good (not as good as Bluebird) but they will only get faster
 - Async / await returns a native Promise no matter what implementation you use, so even if you use a 3rd party library, you will still only get a Native Promise.
 
 =====
 
-### Async / Await
+### `async` / `await`
 
 * The real exciting and _practical_ evolution of async Javascript
 * An `async` function returns a Promise
@@ -674,12 +678,68 @@ _[3 minutes]_
 
 - Even more concise and cleaner code over Promises
 - Better error handling with normal try / catch. Async/await makes it finally possible to handle both synchronous and asynchronous errors with the same construct, good old try/catch.
-- Intuitive handling of conditional logic. We can just use normal if / else contrcuts
+- Intuitive handling of conditional logic. We can just use normal if / else constructs
 - Better error stacks that points exactly to where the exception was thrown
 - Easier debugging
-  - With Promises you can’t set breakpoints in arrow functions that return expressions (no body)
-  - If you set a breakpoint inside a .then block and use debug shortcuts like step-over, the debugger will not move to the the following .then because it only “steps” through synchronous code
-  - With async/await you don’t need arrow functions as much, and you can step through await calls exactly as if they were normal synchronous calls.
+  - If you set a breakpoint inside a `then` block and step-over, the debugger will not move to the the following `then`. This is because it only “steps” through synchronous code
+  - With `async` and `await` you can step through `await` calls exactly as if they were normal synchronous calls.
+
+=====
+
+### Sequential async
+
+```js
+async function main () {
+  const urls = ['github.com', 'standardjs.com', 'nodejs.org']
+  for (let url of urls) {
+    const msg = await get(url)
+    console.log(msg)
+  }
+}
+
+async function get(url) {
+  const r = await got(url)
+  return r.statusMessage
+}
+
+main()
+// OK
+// OK
+// OK
+```
+
+NOTES:
+_[1 minutes]_
+
+- Doing equential async operations now becomes just a matter of using a for loop
+
+=====
+
+### Concurrent execution
+
+```js
+const got = require('got')
+
+async function main () {
+  const urls = ['github.com', 'standardjs.com', 'nodejs.org']
+  const promises = urls.map(url => get(url))
+  let results = await Promise.all(promises);
+  console.log(results); // [ 'OK', 'OK', 'OK' ]
+}
+
+async function get(url) {
+  const r = await got(url)
+  return r.statusMessage
+}
+
+main() 
+```
+
+NOTES:
+_[1 minutes]_
+
+- Just use `Promise.all()`
+- We could also do for of on the promises array and push the values into a results array but I think this code is better
 
 =====
 
@@ -711,63 +771,7 @@ _[1 minutes]_
 - Not using `await`. If we don't use it we get just the Promise. Sometime this is useful. But it can also be a cause of bugs and issues.
 - `await`-ing multiple values in a row is not very efficient. 
 - We have to wait for first call to finish before doing the 2nd one. 
-- Unless it's needed and the intention, use `Promise.all()`
-
-=====
-
-### Sequential async
-
-```js
-async function get(url) {
-  const r = await got(url)
-  return r.statusMessage
-}
-
-async function main () {
-  const urls = ['github.com', 'standardjs.com','nodejs.org']
-  for (let url of urls) {
-    const msg = await get(url)
-    console.log(msg)
-  }
-}
-
-main()
-// OK
-// OK
-// OK
-```
-
-NOTES:
-_[1 minutes]_
-
-- Doing equential async operations now becomes just a matter of using a for loop
-
-=====
-
-### Concurrent execution
-
-```js
-const got = require('got')
-
-async function get(url) {
-  const r = await got(url)
-  return r.statusMessage
-}
-
-async function main () {
-  const urls = ['github.com', 'standardjs.com','nodejs.org']
-  const promises = urls.map(url => get(url))
-  let results = await Promise.all(promises);
-  console.log(results); // [ 'OK', 'OK', 'OK' ]
-}
-
-main() 
-```
-
-NOTES:
-_[1 minutes]_
-
-- We could also do for of on the promises array and push the values into a results array but I think this code is better
+- Use `Promise.all()` unless needed or intended
 
 =====
 
@@ -830,11 +834,14 @@ _[1 minutes]_
 
 ### Final thoughts
 
-* With Promises a much more practical and elegant async mechanism exists in async /await
-* async / awiait is currently supported in Node.js LTS and most browsers
+* With Promises and `async` / `await` we have a much more practical and elegant mechanism for asynchronous code.
+* `async` / `await` is currently supported in Node.js Stable and most browsers
 * Native Promise-based Node.js is coming eventually
 * Start using Promises!
 
+NOTES:
+_[1 minutes]_
+
 =====
 
-### Questions?
+### **Questions?**
