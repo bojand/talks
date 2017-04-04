@@ -187,7 +187,7 @@ _[2 minutes]_
 ### Some benefits
 
 * More radable code
-* Forces consistent asynchronicity
+* Consistent async idioms
 * Zalgo-safe
 * Callbacks can be called multiple times, Promise are resolved once
 * Allows for simpler, more efficient memoization implementations and patterns
@@ -197,7 +197,7 @@ _[3 minutes]_
 
 - Usage of Promises can result in more readable code.
 - Your code will become smaller, more elegant, and easier to reason about. 
-- Even though promises are usually ‘future’ data, once we actually have a promise we don’t need to care whether the data will be there in future, or it’s already been resolved. We call `then()` in either case. As such, promises force consistent asynchronicity 
+- Promises force us to use consistent async idioms. Even though promises are usually ‘future’ data, once we actually have a promise we don’t need to care whether the data will be there in future, or it’s already been resolved. We call `then()` in either case.
 - Zalgo-safe - we do not need to care whther we are actually on the same tick or not
 - Simple memoization, we just need to cache the promise
 
@@ -680,9 +680,7 @@ _[3 minutes]_
 - Better error handling with normal try / catch. Async/await makes it finally possible to handle both synchronous and asynchronous errors with the same construct, good old try/catch.
 - Intuitive handling of conditional logic. We can just use normal if / else constructs
 - Better error stacks that points exactly to where the exception was thrown
-- Easier debugging
-  - If you set a breakpoint inside a `then` block and step-over, the debugger will not move to the the following `then`. This is because it only “steps” through synchronous code
-  - With `async` and `await` you can step through `await` calls exactly as if they were normal synchronous calls.
+- Easier debugging. With `async` and `await` you can step through `await` calls exactly as if they were normal synchronous calls.
 
 =====
 
