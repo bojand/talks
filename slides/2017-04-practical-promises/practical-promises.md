@@ -149,6 +149,11 @@ function performActionAsync(docs) {
     })
   })
 }
+
+performActionAsync(someDocs).then(
+  result => console.log(result), 
+  err => console.error(err)
+)
 ```
 
 NOTES:
@@ -479,7 +484,7 @@ module.exports.fooAsync = pify(foo)
 NOTES:
 _[1 minutes]_
 
-* It has become a somehwat of custom to name the Promised-based functions in these cases with "Async" suffix
+* It has become a somewhat of custom to name the Promised-based functions in these cases with "Async" suffix
 
 =====
 
