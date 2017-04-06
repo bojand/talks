@@ -15,6 +15,8 @@ _[1 minutes]_
     "location": "Fredericton, NB",
     "work": "Cvent",
     "role": "Lead Software Engineer",
+    "twitter": "bojantweets",
+    "github": "bojand"
   },
   "devDependencies": {
     "osx": "^10.11.0",
@@ -39,7 +41,7 @@ _[1 minutes]_
 
 ### Thesis
 
-* Promises are not really special or revolutionary
+* Promises are not really revolutionary
 * Promises are important and beneficial for Javascript
 * You should use them
 * Tips, tricks & lots of code
@@ -204,6 +206,7 @@ _[3 minutes]_
 - Your code will become smaller, more elegant, and easier to reason about. 
 - Promises force us to use consistent async idioms. Even though promises are usually ‘future’ data, once we actually have a promise we don’t need to care whether the data will be there in future, or it’s already been resolved. We call `then()` in either case.
 - Zalgo-safe - we do not need to care whther we are actually on the same tick or not
+- Callbacks can be called multiple times, Promise are resolved once
 - Simple memoization, we just need to cache the promise
 
 =====
