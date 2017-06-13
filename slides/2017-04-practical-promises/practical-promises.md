@@ -193,7 +193,7 @@ _[2 minutes]_
 
 ### Some benefits
 
-* More radable code
+* More readable code
 * Consistent async idioms
 * Zalgo-safe
 * Callbacks can be called multiple times, Promise are resolved once
