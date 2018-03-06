@@ -14,6 +14,8 @@
 
 Thursday, April 6, 2017
 
+[Video](https://www.youtube.com/watch?v=z7CT0WI2UUg)
+
 ## 2016
 
 ### Introduction to Node.js
