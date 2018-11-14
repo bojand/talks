@@ -50,6 +50,9 @@ Talk about current state
 
 - `200 OK` for all successful requests
 
+???
+Notes
+
 ---
 
 # REST API Considerations
@@ -78,6 +81,9 @@ Notes
 .left[![Issue](/img/language_issue.png)]
 <!-- <img src="/img/language_issue.png" alt="Issue" width="640px"> -->
 
+???
+Notes
+
 ---
 
 # REST API Considerations
@@ -92,9 +98,14 @@ Notes
   * Single vs. plural resource names
   * Versioning
 
+???
+Notes
+
 ---
 
-.left[![Issue](/img/grpc-logo.svg)]
+# gRPC
+
+.center[![Issue](/img/grpc-logo.svg)]
 
 - HTTP/2
 - IDL with multi-language support
@@ -102,6 +113,9 @@ Notes
 - Plugins to extend functionality
 - Forwards / Backwards Compatible
 - Self-Describing
+
+???
+Notes
 
 ---
 
@@ -119,3 +133,64 @@ Notes
 - 1.10 'g' stands for ['glamorous'](https://github.com/grpc/grpc/tree/v1.10.x)
 - 1.11 'g' stands for ['gorgeous'](https://github.com/grpc/grpc/tree/v1.11.x)
 - ... ["g stands for" version list](https://github.com/grpc/grpc/blob/master/doc/g_stands_for.md)
+
+???
+Notes
+
+---
+
+# Protocol Buffers
+
+- Interface Definition Language
+- Efficient binary serialization format
+- Language-neutral
+- Flexible & Extensible
+- `protoc` compiler with plugin support
+- Language support: C++, C#, Dart, Go, Java, Android, Java, Node.js, Objective-C, PHP, Python, Ruby
+- Compile `.proto` file to generate language-specific code
+
+???
+Notes
+
+---
+
+# Protocol Buffers gRPC Example
+
+```proto
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+}
+```
+
+???
+Notes
+
+---
+
+# Generating code
+
+```sh
+$ protoc -I helloworld/ \ 
+  helloworld/helloworld.proto \
+  --go_out=plugins=grpc:helloworld
+```
+
+```sh
+$ npm install -g grpc-tools
+$ grpc_tools_node_protoc \
+  --js_out=import_style=commonjs,binary:../node/static_codegen/ \
+  --grpc_out=../node/static_codegen \
+  --plugin=protoc-gen-grpc=grpc_node_plugin helloworld.proto
+```
