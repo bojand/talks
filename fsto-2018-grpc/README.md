@@ -9,6 +9,6 @@ November 29 & 30, 2018
 
 ```sh
 npm install
-npm run server
+npm start
 open http://127.0.0.1:8080
 ```
