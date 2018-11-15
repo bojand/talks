@@ -31,14 +31,25 @@
           padding: 1em 2em 1em 2em;
       }
       .remark-slide-content, .remark-slide {
-        font-size: 28px;
+        font-size: 30px;
       }
       .remark-code,
       .remark-inline-code {
         font-family: 'Menlo';
+        font-size: 20px;
       }
       .remark-code {
         border: solid #ddd;
+      }
+      .title {
+        color: rgb(1, 149, 159);
+        font-size: 54px;
+        font-family: 'Roboto';
+        font-weight: bold;
+      }
+      .footnote{
+        color:#ddd;
+        font-size: 14px;
       }
     </style>
   </head>
@@ -48,6 +59,7 @@
     <script>
       var slideshow = remark.create({
         highlightLines: true,
+        countIncrementalSlides: false,
         sourceUrl: 'slides.md'
       })
     </script>
