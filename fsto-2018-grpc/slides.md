@@ -302,7 +302,7 @@ $ grpc_tools_node_protoc \
 
 ---
 
-# ARCHITECTURE
+# MECHANISM
 
 <br>
 
@@ -317,3 +317,114 @@ $ grpc_tools_node_protoc \
 - Single request and streaming response
 - Duplex / bi-directional streaming
 
+---
+
+# SERVER - Go
+
+```go
+/ server is used to implement helloworld.GreeterServer.
+type server struct{}
+
+// SayHello implements helloworld.GreeterServer
+func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+	return &pb.HelloReply{Message: "Hello " + in.Name}, nil
+}
+
+func main() {
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterGreeterServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
+```
+
+???
+
+- Notes
+
+---
+
+# CLIENT - Go
+
+```go
+func main() {
+	// Set up a connection to the server.
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+  c := pb.NewGreeterClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: "world"})
+	if err != nil {
+		log.Fatalf("could not greet: %v", err)
+	}
+	log.Printf("Greeting: %s", r.Message)
+}
+```
+
+???
+
+- Notes
+
+---
+
+# SERVER - NODE.JS
+
+```js
+var PROTO_PATH = __dirname + '/protos/helloworld.proto';
+var grpc = require('grpc');
+var protoLoader = require('@grpc/proto-loader');
+var packageDefinition = protoLoader.loadSync(PROTO_PATH);
+var hello_proto = grpc.loadPackageDefinition(packageDefinition).helloworld;
+
+// Implements the SayHello RPC method.
+function sayHello(call, callback) {
+  callback(null, {message: 'Hello ' + call.request.name});
+}
+
+// Starts an RPC server that receives requests for the Greeter service 
+function main() {
+  var server = new grpc.Server();
+  server.addService(hello_proto.Greeter.service, { sayHello: sayHello });
+  server.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
+  server.start();
+}
+
+main();
+```
+
+???
+
+- Notes
+
+---
+
+# CLIENT - NODE.JS
+
+```js
+var PROTO_PATH = __dirname + '/../../protos/helloworld.proto';
+
+var grpc = require('grpc');
+var protoLoader = require('@grpc/proto-loader');
+var packageDefinition = protoLoader.loadSync(PROTO_PATH);
+var hello_proto = grpc.loadPackageDefinition(packageDefinition).helloworld;
+
+function main() {
+  var client = new hello_proto.Greeter('localhost:50051',
+                                       grpc.credentials.createInsecure());
+  
+  client.sayHello({ name: 'world' }, (err, response) => {
+    console.log('Greeting: ', response.message);
+  });
+}
+
+main();
+```
