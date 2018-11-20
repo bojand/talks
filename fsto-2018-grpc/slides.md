@@ -188,6 +188,9 @@ class: center, middle
 
 ???
 
+- Originally a Google project internally called "Stubby"
+- Open sourced, mainly developerd by Google employees
+
 ---
 
 # FEATURES
@@ -195,14 +198,14 @@ class: center, middle
 - HTTP/2
 - RPC using Protocol Buffers (or JSON)
 - Plugins to extend functionality
-- Forwards / Backwards Compatible
+- Forwards / Backwards Compatible on the wire
 - Self-Describing
-- Streaming
-- General appication framework (logging, security, monitoring, tracing)
+- Streaming call support
 - Mobile: Android and Objective-C, Experimental Swift
 - Polyglot: C++, Go, Java, Ruby, Node.js, Python, C#, PHP
 
 ???
+
 - HTTP2 is binary, instead of textual
 - is fully multiplexed, instead of ordered and blocking
 - multiple requests can be serviced at the same time in one connection
@@ -210,6 +213,7 @@ class: center, middle
 - each message is an HTTP/2 request with its own headers
 - uses header compression to reduce overhead
 - allows servers to “push” responses proactively to clients
+- General appication framework allows for logging, security, monitoring, tracing via middleware and interceptors
 
 - gRPC core implementations in C++, Go and Java. All others based on C++ core.
 
@@ -312,14 +316,15 @@ $ grpc_tools_node_protoc \
 
 - Generated code provides client libraries and server stubs
 - RPC Mechanisms
-- Unary - simple request / response
-- Streaming request and single response
-- Single request and streaming response
+- Unary - simple client request & server response
+- Streaming request and single server response
+- Single client request and streaming response 
 - Duplex / bi-directional streaming
+- Streaming allows for no / easier pagination mechanisms without need for a cursor or page number
 
 ---
 
-# SERVER - Go
+# SERVER - GO
 
 ```go
 type server struct{}
@@ -348,17 +353,19 @@ func main() {
 
 ---
 
-# CLIENT - Go
+# CLIENT - GO
 
 ```go
 func main() {
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	conn, err := grpc.Dial("localhost:50051",
+		grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(),
+		10*time.Second)
 	defer cancel()
 	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: "world"})
 	if err != nil {
@@ -377,11 +384,11 @@ func main() {
 # SERVER - NODE.JS
 
 ```js
-var PROTO_PATH = __dirname + '../../../protos/helloworld.proto'
-var grpc = require('grpc')
-var protoLoader = require('@grpc/proto-loader')
-var packageDefinition = protoLoader.loadSync(PROTO_PATH)
-var proto = 
+const PROTO_PATH = __dirname + './protos/helloworld.proto'
+const grpc = require('grpc')
+const protoLoader = require('@grpc/proto-loader')
+const packageDefinition = protoLoader.loadSync(PROTO_PATH)
+const proto = 
   grpc.loadPackageDefinition(packageDefinition).helloworld
 
 function sayHello(call, callback) {
@@ -409,16 +416,15 @@ main()
 # CLIENT - NODE.JS
 
 ```js
-var PROTO_PATH = __dirname + '../../../protos/helloworld.proto';
-
-var grpc = require('grpc');
-var protoLoader = require('@grpc/proto-loader');
-var packageDefinition = protoLoader.loadSync(PROTO_PATH);
-var proto = 
+const PROTO_PATH = __dirname + './protos/helloworld.proto';
+const grpc = require('grpc');
+const protoLoader = require('@grpc/proto-loader');
+const packageDefinition = protoLoader.loadSync(PROTO_PATH);
+const proto = 
   grpc.loadPackageDefinition(packageDefinition).helloworld;
 
 function main() {
-  var client = new proto.Greeter(
+  const client = new proto.Greeter(
     'localhost:50051', grpc.credentials.createInsecure());
   
   client.sayHello({ name: 'world' }, (err, response) => {
@@ -468,6 +474,7 @@ message HelloRes {
 # SERVER STREAMING - NODE.JS
 
 ```js
+// server.js
 function sayHellos(call) {
   let n = 0
   const timer = setInterval(() => {
@@ -481,11 +488,144 @@ function sayHellos(call) {
   }, 200)
 }
 ```
+
+???
+
+- Notes
+
+---
+
+# SERVER STREAMING - NODE.JS
+
 ```js
-function sayHellos(fn) {
-  const call = client.sayHellos({ name: 'world', count: 5 })
-  call.on('data', ({ message }) => console.log('Greeting: ', message))
-  call.on('end', fn)
+// client.js
+const deadline = 
+  new Date().setSeconds(new Date().getSeconds() + 5)
+
+const call = client.sayHellos(
+  { name: 'world', count: 5 }, 
+  { deadline })
+
+call.on('data', 
+  ({ message }) => console.log('Greeting: ', message))
+
+call.on('end', () => console.log('done'))
+```
+
+???
+
+- Notes
+
+---
+
+# CLIENT STREAMING - GO
+
+```go
+// server.go
+func (s *server) GreetMany(stream pb.Greeter_GreetManyServer)
+error {
+	names := make([]string, 0, 5)
+	for {
+		in, err := stream.Recv()
+		if err == io.EOF {
+			msg := "Hello " + strings.Join(names, ", ")
+			res := &pb.HelloRes{Message: msg}
+			return stream.SendAndClose(res)
+		}
+		if err != nil {
+			return err
+		}
+		names = append(names, in.Name)
+	}
 }
 ```
 
+???
+
+- Notes
+
+---
+
+# CLIENT STREAMING - GO
+
+```go
+// client.go
+func greetMany(client pb.GreeterClient) {
+	ctx, cancel := context.WithTimeout(context.Background(), 
+		10*time.Second)
+	defer cancel()
+  
+	stream, err := client.GreetMany(ctx)
+	
+	names := [4]string{"Bob", "Kate", "Jim", "Sara"}
+  
+	for _, name := range names {
+		msg := &pb.HelloReq{Name: names[n]}
+		stream.Send(msg)
+	}
+
+	reply, _ := stream.CloseAndRecv()
+	log.Printf("Greeting: %v", reply.Message)
+}
+```
+
+???
+
+- Notes
+
+---
+
+# BIDI STREAMING - GO
+
+```go
+// server.go
+func (s *server) GreetChat(stream pb.Greeter_GreetChatServer)
+error {
+	for {
+		in, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		msg := &pb.HelloRes{Message: "Hello " + in.Name}
+		if err := stream.Send(msg); err != nil {
+			return err
+		}
+	}
+}
+```
+
+???
+
+- Notes
+
+---
+
+# BIDI STREAMING - NODE.JS
+
+```js
+// client.js
+call = client.greetChat()
+const NAMES = ['Bob', 'Kate', 'Jim', 'Sara']
+let n = 0
+const timer = setInterval(() => {
+  if (n < NAMES.length) {
+    call.write({ name: NAMES[n] })
+    n++
+  } else {
+    clearInterval(timer)
+    call.end()
+  }
+}, 200)
+
+call.on('data',
+  ({ message }) => console.log('Greeting:', message))
+
+call.on('end', () => console.log('done'))
+```
+
+???
+
+- Notes
