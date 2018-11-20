@@ -322,11 +322,10 @@ $ grpc_tools_node_protoc \
 # SERVER - Go
 
 ```go
-/ server is used to implement helloworld.GreeterServer.
 type server struct{}
 
-// SayHello implements helloworld.GreeterServer
-func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+func (s *server) SayHello(ctx context.Context, 
+    in *pb.HelloRequest) (*pb.HelloReply, error) {
 	return &pb.HelloReply{Message: "Hello " + in.Name}, nil
 }
 
@@ -353,13 +352,12 @@ func main() {
 
 ```go
 func main() {
-	// Set up a connection to the server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-  c := pb.NewGreeterClient(conn)
+	c := pb.NewGreeterClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: "world"})
@@ -379,26 +377,27 @@ func main() {
 # SERVER - NODE.JS
 
 ```js
-var PROTO_PATH = __dirname + '/protos/helloworld.proto';
-var grpc = require('grpc');
-var protoLoader = require('@grpc/proto-loader');
-var packageDefinition = protoLoader.loadSync(PROTO_PATH);
-var hello_proto = grpc.loadPackageDefinition(packageDefinition).helloworld;
+var PROTO_PATH = __dirname + '../../../protos/helloworld.proto'
+var grpc = require('grpc')
+var protoLoader = require('@grpc/proto-loader')
+var packageDefinition = protoLoader.loadSync(PROTO_PATH)
+var proto = 
+  grpc.loadPackageDefinition(packageDefinition).helloworld
 
-// Implements the SayHello RPC method.
 function sayHello(call, callback) {
-  callback(null, {message: 'Hello ' + call.request.name});
+  callback(null, { message: 'Hello ' + call.request.name })
 }
 
-// Starts an RPC server that receives requests for the Greeter service 
 function main() {
-  var server = new grpc.Server();
-  server.addService(hello_proto.Greeter.service, { sayHello: sayHello });
-  server.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
-  server.start();
+  var server = new grpc.Server()
+  server.addService(proto.Greeter.service, 
+    { sayHello: sayHello })
+  server.bind('0.0.0.0:50051',
+    grpc.ServerCredentials.createInsecure())
+  server.start()
 }
 
-main();
+main()
 ```
 
 ???
@@ -410,16 +409,17 @@ main();
 # CLIENT - NODE.JS
 
 ```js
-var PROTO_PATH = __dirname + '/../../protos/helloworld.proto';
+var PROTO_PATH = __dirname + '../../../protos/helloworld.proto';
 
 var grpc = require('grpc');
 var protoLoader = require('@grpc/proto-loader');
 var packageDefinition = protoLoader.loadSync(PROTO_PATH);
-var hello_proto = grpc.loadPackageDefinition(packageDefinition).helloworld;
+var proto = 
+  grpc.loadPackageDefinition(packageDefinition).helloworld;
 
 function main() {
-  var client = new hello_proto.Greeter('localhost:50051',
-                                       grpc.credentials.createInsecure());
+  var client = new proto.Greeter(
+    'localhost:50051', grpc.credentials.createInsecure());
   
   client.sayHello({ name: 'world' }, (err, response) => {
     console.log('Greeting: ', response.message);
@@ -428,3 +428,64 @@ function main() {
 
 main();
 ```
+
+???
+
+- Notes
+
+---
+
+# MORE COMPLEX
+
+```proto
+syntax = "proto3";
+
+package greeter;
+
+service Greeter {
+    rpc SayHello (HelloReq) returns (HelloRes) {}
+    rpc SayHellos (HelloReq) returns (stream HelloRes) {}
+    rpc GreetMany (stream HelloReq) returns (HelloRes) {}
+    rpc GreetChat (stream HelloReq) returns (stream HelloRes) {}
+}
+
+message HelloReq {
+    string name = 1;
+    int32 count = 2;
+}
+
+message HelloRes {
+    string message = 1;
+}
+```
+
+???
+
+- Notes
+
+---
+
+# SERVER STREAMING - NODE.JS
+
+```js
+function sayHellos(call) {
+  let n = 0
+  const timer = setInterval(() => {
+    if (n < call.request.count) {
+        call.write({ message: 'Hello ' + call.request.name })
+        n++
+    } else {
+        clearInterval(timer)
+        call.end()
+    }
+  }, 200)
+}
+```
+```js
+function sayHellos(fn) {
+  const call = client.sayHellos({ name: 'world', count: 5 })
+  call.on('data', ({ message }) => console.log('Greeting: ', message))
+  call.on('end', fn)
+}
+```
+
