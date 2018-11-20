@@ -16,35 +16,37 @@ function sayHello(call, callback) {
 
 function sayHellos(call) {
   console.log('server:sayHellos')
+
   const count = call.request.count
   let n = 0
   const timer = setInterval(() => {
     if (n < count) {
-        call.write({ message: 'Hello ' + call.request.name })
-        n++
+      call.write({ message: 'Hello ' + call.request.name })
+      n++
     } else {
-        clearInterval(timer)
-        call.end()
+      clearInterval(timer)
+      call.end()
     }
   }, 200)
 }
 
-function sayHelloCs(call, fn) {
-  const rn = call.metadata.getMap().rn
-  console.log(rn)
+function greetMany(call, fn) {
+  console.log('server:greetMany')
 
-  let counter = 0
+  let names = []
+
   call.on('data', d => {
-    console.dir(d)
-    counter++
+    names.push(d.name)
   })
 
   call.on('end', () => {
-    fn(null, { message: 'Hello ' + counter })
+    fn(null, { message: 'Hello ' + names.join(', ') })
   })
 }
 
-function sayHelloBidi(call) {
+function greetChat(call) {
+  console.log('server:greetChat')
+
   call.on('data', d => {
     call.write({ message: 'Hello ' + d.name })
   })
@@ -60,8 +62,8 @@ function main() {
   server.addService(proto.Greeter.service, {
     sayHello,
     sayHellos,
-    // sayHelloCs,
-    // sayHelloBidi
+    greetMany,
+    greetChat
   })
 
   server.bind(HOSTPORT, grpc.ServerCredentials.createInsecure())

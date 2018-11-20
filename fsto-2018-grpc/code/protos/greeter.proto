@@ -7,22 +7,18 @@ option objc_class_prefix = "GRT";
 
 package greeter;
 
-// The greeting service definition.
 service Greeter {
-    // Sends a greeting
-    rpc SayHello (HelloRequest) returns (HelloReply) {}
-    rpc SayHellos (HelloRequest) returns (stream HelloReply) {}
-    // rpc GreetAll (stream HelloRequest) returns (HelloReply) {}
-    // rpc GreetChat (stream HelloRequest) returns (stream HelloReply) {}
+    rpc SayHello (HelloReq) returns (HelloRes) {}
+    rpc SayHellos (HelloReq) returns (stream HelloRes) {}
+    rpc GreetMany (stream HelloReq) returns (HelloRes) {}
+    rpc GreetChat (stream HelloReq) returns (stream HelloRes) {}
 }
 
-// The request message containing the user's name.
-message HelloRequest {
+message HelloReq {
     string name = 1;
     int32 count = 2;
 }
 
-// The response message containing the greetings
-message HelloReply {
+message HelloRes {
     string message = 1;
 }
