@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "fsto.greeter";
+option java_outer_classname = "GreeterProto";
+option objc_class_prefix = "GRT";
+
+package greeter;
+
+// The greeting service definition.
+service Greeter {
+    // Sends a greeting
+    rpc SayHello (HelloRequest) returns (HelloReply) {}
+    rpc SayHellos (HelloRequest) returns (stream HelloReply) {}
+    rpc GreetAll (stream HelloRequest) returns (HelloReply) {}
+    rpc GreetChat (stream HelloRequest) returns (stream HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+    string name = 1;
+    int32 count = 2;
+}
+
+// The response message containing the greetings
+message HelloReply {
+    string message = 1;
+}
