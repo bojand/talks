@@ -165,6 +165,10 @@ Notes
 
 ???
 
+- Example of non-resourceful: 
+    * Restart some application / host
+    * Encrypt some text
+    * Classify an image or a sentance
 - Maybe the same mechanisms of how we served static content is perhaps not the best way for applications to communicate to each other?
 
 ---
@@ -177,7 +181,7 @@ class: center, middle
 
 - We want the convenience of local function calls... but to be executed in distributed manner.
 - That is if we commit into the RPC paradigm in the distributed systems context
-- Alternative we could chose different architecture altogeher, such as asyncrhonous reactive systems.
+- Alternative we could chose different architecture altogeher, such as asynchronous reactive systems.
 - But even then, a lot of what we talk about here may still apply in some ways.
 
 ---
@@ -335,21 +339,22 @@ func (s *server) SayHello(ctx context.Context,
 }
 
 func main() {
-	lis, err := net.Listen("tcp", ":50051")
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	s := grpc.NewServer()
-	pb.RegisterGreeterServer(s, &server{})
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	lis, _ := net.Listen("tcp", ":50051")
+	grpcServer := grpc.NewServer()
+  pb.RegisterGreeterServer(grpcServer, &server{})
+  reflection.Register(grpcServer)
+	grpcServer.Serve(lis)
 }
 ```
 
 ???
 
-- Notes
+- SayHello is the implementation of our service
+- Think of it as lamda function
+- The code in main() is a bit of boiler plate
+- Reflection is for introspection. 
+  - The service can explain what services and methods this grpc server has
+  - Client can connect and build the client without knowning what lives on the server
 
 ---
 
@@ -471,10 +476,9 @@ message HelloRes {
 
 ---
 
-# SERVER STREAMING - NODE.JS
+# SERVER STREAMING - SERVER
 
 ```js
-// server.js
 function sayHellos(call) {
   let n = 0
   const timer = setInterval(() => {
@@ -495,10 +499,9 @@ function sayHellos(call) {
 
 ---
 
-# SERVER STREAMING - NODE.JS
+# SERVER STREAMING - CLIENT
 
 ```js
-// client.js
 const deadline = 
   new Date().setSeconds(new Date().getSeconds() + 5)
 
@@ -518,10 +521,9 @@ call.on('end', () => console.log('done'))
 
 ---
 
-# CLIENT STREAMING - GO
+# CLIENT STREAMING - SERVER
 
 ```go
-// server.go
 func (s *server) GreetMany(stream pb.Greeter_GreetManyServer)
 error {
 	names := make([]string, 0, 5)
@@ -546,10 +548,9 @@ error {
 
 ---
 
-# CLIENT STREAMING - GO
+# CLIENT STREAMING - CLIENT
 
 ```go
-// client.go
 func greetMany(client pb.GreeterClient) {
 	ctx, cancel := context.WithTimeout(context.Background(), 
 		10*time.Second)
@@ -575,10 +576,9 @@ func greetMany(client pb.GreeterClient) {
 
 ---
 
-# BIDI STREAMING - GO
+# BIDI STREAMING - SERVER
 
 ```go
-// server.go
 func (s *server) GreetChat(stream pb.Greeter_GreetChatServer)
 error {
 	for {
@@ -603,10 +603,9 @@ error {
 
 ---
 
-# BIDI STREAMING - NODE.JS
+# BIDI STREAMING - CLIENT
 
 ```js
-// client.js
 call = client.greetChat()
 const NAMES = ['Bob', 'Kate', 'Jim', 'Sara']
 let n = 0
@@ -629,3 +628,171 @@ call.on('end', () => console.log('done'))
 ???
 
 - Notes
+
+---
+
+# METADATA - CLIENT
+
+```go
+conn, _ := grpc.Dial("localhost:50051", grpc.WithInsecure())
+defer conn.Close()
+
+c := pb.NewGreeterClient(conn)
+
+ctx, cancel := context.WithTimeout(context.Background(),
+  time.Second)
+defer cancel()
+
+ctx = metadata.AppendToOutgoingContext(
+  ctx, "token", "xyz", "request-id", "123")
+
+res, _ := c.SayHello(ctx, &pb.HelloRequest{Name: "world"})
+
+log.Printf("Greeting: %s", res.Message)
+```
+
+???
+
+- All implementations should support it
+- With Node.js just add it as an additional parameter
+
+---
+
+# METADATA - SERVER
+
+```go
+func (s *server) SayHello(ctx context.Context, 
+  in *pb.HelloRequest) (*pb.HelloReply, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	for k, v := range md {
+		fmt.Printf("%s: %s\n", k, v)
+	}
+
+	return &pb.HelloReply{Message: "Hello " + in.Name}, nil
+}
+```
+
+```sh
+:authority: [localhost:50051]
+content-type: [application/grpc]
+user-agent: [grpc-go/1.16.0]
+token: [xyz]
+request-id: [123]
+```
+
+???
+
+- Notes
+
+---
+
+# INTERCEPTORS
+
+```go
+func clientInterceptor(ctx context.Context, method string,
+	req interface{}, reply interface{},
+  cc *grpc.ClientConn, invoker grpc.UnaryInvoker, 
+  opts ...grpc.CallOption,
+) error {
+	start := time.Now()
+
+	err := invoker(ctx, method, req, reply, cc, opts...)
+
+  fmt.Printf("Invoked RPC method=%s; Duration=%s; Error=%v\n", 
+    method, time.Since(start), err)
+
+	return err
+}
+```
+
+```go
+conn, err := grpc.Dial(addr, grpc.WithInsecure()
+  grpc.WithUnaryInterceptor(clientInterceptor))
+```
+
+???
+
+- Server-side interceptors / middleware also supported
+- Not all languages have the same level of support
+  * For example there is no support for server-side middleware for Node.js
+
+---
+
+# TOOLING - CLI
+
+```sh
+$ grpc_cli ls localhost:50051
+helloworld.Greeter
+grpc.reflection.v1alpha.ServerReflection
+
+$ grpc_cli ls localhost:50051 helloworld.Greeter -l
+filename: helloworld.proto
+package: helloworld;
+service Greeter {
+  rpc SayHello(helloworld.HelloRequest) returns (helloworld.HelloReply) {}
+}
+
+$ grpc_cli call localhost:50051 SayHello 'name: "john"'
+connecting to localhost:50051
+message: "Hello john"
+
+Rpc succeeded with OK status
+```
+
+???
+
+- `grpc_cli` is the official command line tool
+- There are other options such as grpcurl
+
+---
+
+# WEB SUPPORT ?
+
+.center[![gRPC-Web](/img/grpc-web.png)]
+
+```sh
+protoc helloworld.proto \
+  --js_out=import_style=commonjs:./codegen \
+  --grpc-web_out=import_style=commonjs:./codegen
+```
+
+???
+
+- We generate types like normal using `protoc`
+- We Web client using `protoc` using 
+- Envoy must be used as a proxy for web clients to talk to
+- Nginx can also work
+
+---
+
+# HTTP / JSON + gRPC
+
+```proto
+package helloworld;
+
+*import "google/api/annotations.proto";
+
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply) {
+*    option (google.api.http) = {
+*      get: "/say"
+*    };
+  }
+}
+```
+
+- Use [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) to build a REST API service
+- Use Envoy's gRPC-JSON transcoder filter
+
+???
+
+- `grpc-gateway` can be used to generate a Go stub that you then can create a go service proxy
+- `grpc-gateway` can be used to generate swagger deinition as well
+- Maps streaming APIs to newline-delimited JSON streams
+- No BiDi streaming support
+
+- Envoy's gRPC-JSON transcoder filter allows a RESTful JSON API client to send requests to Envoy over HTTP and get proxied to a gRPC service. The HTTP mapping for the gRPC service has to be defined by custom options.
+- for gRPC stream request parameters, Envoy expects an array of messages, and it returns an array of messages for stream response parameters.
+- No BiDi streaming support
+
+- There are projects in Go at least that let you serve both HTTP+JSON and gRPC from single service on different ports

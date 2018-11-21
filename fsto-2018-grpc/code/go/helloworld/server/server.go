@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 
 	pb "server/helloworld"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 // server is used to implement helloworld.GreeterServer.
@@ -15,6 +17,15 @@ type server struct{}
 
 // SayHello implements helloworld.GreeterServer
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+	fmt.Println("server:SayHello")
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		for k, v := range md {
+			fmt.Printf("%s: %s\n", k, v)
+		}
+	}
+
 	return &pb.HelloReply{Message: "Hello " + in.Name}, nil
 }
 
