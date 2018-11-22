@@ -16,7 +16,7 @@ class: center, middle
 
 ???
 
-The internet was simple. Servers served static HTML content that was rendered in the browser.
+Lets go back to a simpler time. The internet was simple. Servers served static HTML content that was rendered in the browser.
 
 ---
 
@@ -42,14 +42,15 @@ The internet was simple. Servers served static HTML content that was rendered in
 
 ???
 
-- As our systems grew and evolved, to overcome the challenges of scale we started breaking up the monolith into microservices.
+- As our systems grew and evolved, to overcome the challenges of scale we started breaking up the monolith into microservices
+- A single PHP application became a number of different services written in Pyton, Java, Node.js, Go and others.
 - How systems and different application communicate and talk to each other has drastically changed over the past two decades.
 
 ---
 
 # PRESENT DAY
 
-- Complex distributed computing landscape
+- Complex polyglot distributed computing landscape
 - Systems and applications need to communicate
 - Almost everything provides an API
 
@@ -796,3 +797,259 @@ service Greeter {
 - No BiDi streaming support
 
 - There are projects in Go at least that let you serve both HTTP+JSON and gRPC from single service on different ports
+
+---
+
+# CHANGE
+
+- Name of fields are less important than field numbers
+- Do not change the type or number of a field
+- Adding fields is safe
+- Do not remove a field number immediately, mark as deprecated
+- Remove field when ready, consider marking the number reserved
+- Do not reuse a field number unless absolutely sure
+- Be aware of the default values for the data types
+- If you need a version set it in package name
+
+???
+
+- Field name can be changed and will not effect serialization
+
+---
+
+# CHANGE
+
+```proto
+// v2
+message HelloRequest {
+  string name = 1;
+  bool reverse = 2;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+  string reversed = 2;
+}
+```
+
+???
+
+**Client v1 <-> Server v2**
+- client will not know about reverse, and it will default to `false`
+- client will get just the message
+
+**Client v2 <-> Server v1**
+- client may set the flag to `true`
+- server will not know about `reverse` and will return old reply format
+- client will get a message without `reversed` which will get a default empty string
+
+Generally servers would be released before clients.
+
+---
+
+# CHANGE - REMOVAL
+
+```proto
+// v3
+message HelloRequest {
+  string name = 1 [deprecated=true];
+  bool reverse = 2;
+  string first_name = 3;
+  string last_name = 4;
+}
+```
+
+```proto
+// v4
+message HelloRequest {
+  reserved 2;
+  reserved "name";
+
+  bool reverse = 2;
+  string first_name = 3;
+  string last_name = 4;
+}
+```
+
+???
+
+- First mark it deprecated and allow for clients to update.
+- Keep server logic in place
+- Once ready to remove, remove it.
+- To prohibit developers from accidentaly reusing the field name and number reserve it
+- The protocol buffer compiler will complain if any future users try to use these field identifiers. 
+- Once enough time has passed that you know there will be no binary serialization of original field in the wild, remove reserved
+
+---
+
+# Workflow & Design
+
+- Monorepo for all type and service definitions
+- Review API changes with normal PR process
+- Automatically test compilation, linting, etc...
+- Services version control generated code as needed
+- Have a style guide
+  * https://cloud.google.com/apis/design/
+- Be concise and consistent
+- Be eventful
+
+???
+
+- Services should be small and concise
+- Do one thing and one thing well
+- gRPC does not solve the problem of properly designing API's
+- Have a style and be consistent in API design
+  * Ex: `Update` vs `Save` etc...
+- You can use Protocol Buffers as Kafka Serialization
+
+---
+
+# CHALLENGES
+
+- Load Balancing
+- Error Handling
+- Browser Support
+- More detailed and centralized documentation
+- Poor feature parity between language suport
+- Standardization and consistancy between languages
+- Debuggability
+
+???
+
+- Load balancing is an improving issue, Envoy, Linkerd and Nginx can all support gRPC now
+- Error handling used to be ugly and poor and has been improved
+- gRPC-Web was generally available at the end of October
+- gRPC documentation beyond the basic tutorial is non-existant and / or scattered and is lacking in more detailed reference and guidance on more advanced topics and examples
+- There is inconsistent feature set between languages. For example Java has both client and server interceptors, while client side interceptors were only recently added to Node.js and there is no server side middleware in core at all. There are 3rd party modules to address this issue.
+- Inconsistency in semantics between languages. 
+  * timeout in Go vs. deadline in Node.js
+- The fact that we are dealing with binary data means we can't just inspect data accross the wire. A new tool called Channelz can be used to gather comprehensive runtime info about connections in gRPC. It is designed to help debug live programs.
+
+---
+
+# ERRORS
+
+- Used to be just an integer status and string message
+- Support for details has been added to some languages
+
+```go
+st := status.New(codes.ResourceExhausted, 
+  "Request limit exceeded.")
+
+ds, err := st.WithDetails(
+  &epb.QuotaFailure{
+    Violations: []*epb.QuotaFailure_Violation{{
+      Subject:     fmt.Sprintf("name:%s", in.Name),
+      Description: "Limit one greeting per person",
+    }},
+  },
+)
+return nil, ds.Err()
+```
+
+???
+
+- Node.js errors can take metadata
+- Go provide `status` API
+
+---
+
+<img src="/img/ghmwissues.png" alt="Issues">
+
+???
+
+- Can we have middleware please?
+
+---
+
+# DEJA VU ALL OVER AGAIN
+
+- SOAP / WSDL
+- Swagger & JSON Schema
+- JSON-RPC
+- Thrift
+- MessagePack
+- GraphQL
+- Twirp
+
+???
+
+** SOAP / WSDL**
+- Tied to XML (protobuf is pluggable)
+- Unnecessarily complex
+- Infexible with regards to compatibility
+- No Streaming
+
+**Swagger*
+- It is machine readable
+- Lots of tooling
+- Tied to HTTP/JSON
+- Performance issues and no streaming
+- Very verbose and cumbersome, a single definition takes pages of code
+
+**Thrift**
+- Started out as a promising serialization format similar to Protocol Buffers
+- Failed to build a supported RPC system out of it due to level of effort required.
+
+**MessagePack**
+- Pretty flexible and well supported binary serialization format
+- There is RPC on top but poor for building well designed and maintainable contracts and APIs
+
+**GraphQL**
+- Interesting option for clients / frontends to query exactly the data they need
+- Human readable and schema-based with types
+- Still works over HTTP and no streaming
+- Perhaps not ideal for service <-> service communication
+
+**Twirp**
+- A simpler gRPC from Twitch that works with HTTP/1
+- Good alternative if you're not comfortable with the hard HTTP2 requirement
+
+**Future**
+
+> A furious bout of language and protocol design takes place and a new distributed computing paradigm is announced that is compliant with the latest programming model. After several years, the percentage of distributed applications is discovered not to have increased significantly, and the cycle begins anew. - Waldo et al
+
+---
+
+# REJOINER
+
+http://rejoiner.io
+
+<img src="/img/rejoiner.png" alt="Rejoiner" width="580">
+
+???
+
+- Interesting project to expose grpc API's via a uniform GraphQL API
+
+---
+
+# GRPC USERS
+
+- Google - Google Cloud Services APIs and internally other products
+- Square - Most internal RPC
+- CoreOS - etcd v3 API is entirelty gRPC
+- Lyft
+- Netflix
+- Coockroach Labs
+- Bugsnag
+- VSCO
+- Namely
+- and others...
+
+???
+
+- Google - PubSub, Speech Rec
+- Netflix heavily uses Java and has been active in RFPs for Node.js
+
+---
+
+# THANK YOU!
+
+Bojan Djurkovic
+
+Lead Software Engineer
+
+https://github.com/bojand
+
+@bojantweets
