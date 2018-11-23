@@ -6,6 +6,35 @@ class: center, middle
 
 ## A guide to gRPC
 
+???
+
+- **P** for presentation mode
+- **C** to clone the window
+
+- Hello and thank you for having me!
+
+---
+
+# ABOUT ME
+
+Bojan Djurkovic
+
+Lead Software Engineer @ Cvent
+
+@bojantweets
+
+https://github.com/bojand/fsto-2018-grpc
+
+???
+
+- My name is Bojan Djurkovic and I am a Lead Software Engineer at Cvent
+- It's a company that makes software solutions for managing events similar to this one
+- But we're not involved with this event
+- I've done a lot of things at Cvent over time, but most of my day to day activities currently involve a lot of Java and Kafka
+- On the side I try to explore different technologies and do some open source
+- Over the past couple of years most of that has been focused on gRPC
+- Which is what we're going to be talking about today...
+
 ---
 
 # A SIMPLER TIME...
@@ -81,6 +110,7 @@ $ curl https://api.stripe.com/v1/charges \
 ```
 
 ???
+
 Talk about current state
 
 ---
@@ -97,7 +127,9 @@ Talk about current state
 - Performant?
 
 ???
-Talk about current state
+
+- REST is nice we're all familair with it
+- It's relatively easy to debug
 
 ---
 
@@ -114,7 +146,8 @@ Talk about current state
 - `200 OK` for all successful requests
 
 ???
-Notes
+
+- Not picking on any one company but even with well used API's we see difference in opinion and structure of the very basic and fundamental factors of the REST arhitecture.
 
 ---
 
@@ -133,6 +166,7 @@ Notes
 - Conditional Requests
 - CORS
 - JSON-P
+- Callbacks
 
 ???
 
@@ -146,7 +180,8 @@ And even if you take the time and get it all right...
 <!-- <img src="/img/language_issue.png" alt="Issue" width="640px"> -->
 
 ???
-Notes
+
+- We get requests for client libraries in perticular language
 
 ---
 
@@ -159,10 +194,9 @@ Notes
 - Not all operations are "resource"-based
 - Semantics
   * `POST`/`PUT`/`PATCH`
-  * Status codes
-  * Error responses
+  * Status codes & Error responses
   * Single vs. plural resource names
-  * Versioning
+  * ID in param or in body?
 
 ???
 
@@ -170,6 +204,7 @@ Notes
     * Restart some application / host
     * Encrypt some text
     * Classify an image or a sentance
+
 - Maybe the same mechanisms of how we served static content is perhaps not the best way for applications to communicate to each other?
 
 ---
@@ -182,6 +217,7 @@ class: center, middle
 
 - We want the convenience of local function calls... but to be executed in distributed manner.
 - That is if we commit into the RPC paradigm in the distributed systems context
+
 - Alternative we could chose different architecture altogeher, such as asynchronous reactive systems.
 - But even then, a lot of what we talk about here may still apply in some ways.
 
@@ -213,11 +249,10 @@ class: center, middle
 
 - HTTP2 is binary, instead of textual
 - is fully multiplexed, instead of ordered and blocking
-- multiple requests can be serviced at the same time in one connection
-- one long lived connection
-- each message is an HTTP/2 request with its own headers
-- uses header compression to reduce overhead
+- multiple requests can be serviced at the same time in one long-lived connection
+- allows streaming
 - allows servers to “push” responses proactively to clients
+
 - General appication framework allows for logging, security, monitoring, tracing via middleware and interceptors
 
 - gRPC core implementations in C++, Go and Java. All others based on C++ core.
@@ -240,22 +275,9 @@ class: center, middle
 - ... ["g stands for" version list](https://github.com/grpc/grpc/blob/master/doc/g_stands_for.md)
 
 ???
-Notes
 
----
-
-# PROTOCOL BUFFERS
-
-- Interface Definition Language
-- Machine readable
-- Efficient binary serialization format
-- Language-neutral
-- Flexible & extensible
-- `protoc` compiler with plugin support
-- Compile `.proto` file to generate language-specific code
-
-???
-Notes
+- What does gRPC stand for?
+- "g" stands for something different in every version 
 
 ---
 
@@ -280,7 +302,16 @@ message HelloReply {
 ```
 
 ???
-Notes
+
+- This is a Protocol Buffer definition file
+- It's Interface Description Language used to describe types and services
+- I'ts machine readable
+
+- This is simple and concise
+- Just by reading it we can understand the general idea of this service and the API contract
+
+- `protoc` compiles `.proto` file to generate language-specific code
+- `protoc` compiler with plugin support
 
 ---
 
@@ -306,8 +337,7 @@ $ grpc_tools_node_protoc \
 - Install `protoc` compiler
 - Compile `.proto` file to generate language-specific code
 - Generated code is not to be edited
-- Generated code is not idomatic for the target language, and is optimized for performance
-- Use generated code for serialization and deserialization of data 
+- Generated code is not necessarily idomatic for the target language
 
 ---
 
@@ -320,7 +350,7 @@ $ grpc_tools_node_protoc \
 ???
 
 - Generated code provides client libraries and server stubs
-- RPC Mechanisms
+- gRPC libraries provides RPC Mechanisms
 - Unary - simple client request & server response
 - Streaming request and single server response
 - Single client request and streaming response 
@@ -383,7 +413,10 @@ func main() {
 
 ???
 
-- Notes
+- We create a connection
+- We create a client from our generated code
+- And we call our function to communicate with the server
+- One interesting thing to nitice is we get timeout support for free
 
 ---
 
@@ -415,14 +448,14 @@ main()
 
 ???
 
-- Notes
+- Same idea for Node.js
+- In case of Node.js we have the option of using dynamic generation of our client and server code, which is sometimes more convinient
 
 ---
 
 # CLIENT - NODE.JS
 
 ```js
-const PROTO_PATH = __dirname + './protos/helloworld.proto';
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 const packageDefinition = protoLoader.loadSync(PROTO_PATH);
@@ -432,9 +465,13 @@ const proto =
 function main() {
   const client = new proto.Greeter(
     'localhost:50051', grpc.credentials.createInsecure());
-  
-  client.sayHello({ name: 'world' }, (err, response) => {
-    console.log('Greeting: ', response.message);
+
+  const deadline = 
+    new Date().setSeconds(new Date().getSeconds() + 5)
+
+  client.sayHello({ name: 'world' }, { deadline }, 
+    (err, response) => {
+      console.log('Greeting: ', response.message);
   });
 }
 
@@ -443,7 +480,7 @@ main();
 
 ???
 
-- Notes
+- Similar code for Node.js client side
 
 ---
 
@@ -473,7 +510,8 @@ message HelloRes {
 
 ???
 
-- Notes
+- Here we see different types in Protocol Buffer definition
+- And an example of streaming requests
 
 ---
 
@@ -496,19 +534,16 @@ function sayHellos(call) {
 
 ???
 
-- Notes
+- The call is essentially a regular stream that we write messages to
+- The `setInterval()` is used just to simulate some expensive operation like reading from the database or performing some asynchronous computation
 
 ---
 
 # SERVER STREAMING - CLIENT
 
 ```js
-const deadline = 
-  new Date().setSeconds(new Date().getSeconds() + 5)
-
 const call = client.sayHellos(
-  { name: 'world', count: 5 }, 
-  { deadline })
+  { name: 'world', count: 5 })
 
 call.on('data', 
   ({ message }) => console.log('Greeting: ', message))
@@ -518,7 +553,8 @@ call.on('end', () => console.log('done'))
 
 ???
 
-- Notes
+- We call our method and get a stream back
+- We just read the stream normally to get the data
 
 ---
 
@@ -545,7 +581,10 @@ error {
 
 ???
 
-- Notes
+- In Go for client streaming we receive a stream on the server side
+- The type comes from our generated code
+- We receive messages
+- When we get to the end of the stream we send the final response back
 
 ---
 
@@ -573,7 +612,8 @@ func greetMany(client pb.GreeterClient) {
 
 ???
 
-- Notes
+- On client we call our method and get a stream to which we just send messages
+- Once done we do final close and receive to get the final response from the server
 
 ---
 
@@ -600,7 +640,7 @@ error {
 
 ???
 
-- Notes
+- Putting both together we essentially have a chat where both client and server our utilizing a stream to send and receive messages
 
 ---
 
@@ -628,7 +668,8 @@ call.on('end', () => console.log('done'))
 
 ???
 
-- Notes
+- Just an example of calling our BiDi method in Node.js
+- Note that there are no parameters as we send them via stream operation
 
 ---
 
@@ -644,8 +685,8 @@ ctx, cancel := context.WithTimeout(context.Background(),
   time.Second)
 defer cancel()
 
-ctx = metadata.AppendToOutgoingContext(
-  ctx, "token", "xyz", "request-id", "123")
+*ctx = metadata.AppendToOutgoingContext(
+*  ctx, "token", "xyz", "request-id", "123")
 
 res, _ := c.SayHello(ctx, &pb.HelloRequest{Name: "world"})
 
@@ -654,6 +695,8 @@ log.Printf("Greeting: %s", res.Message)
 
 ???
 
+- We can use metadata to send additional contextual information about calls
+- This can be used for authentication or tracing
 - All implementations should support it
 - With Node.js just add it as an additional parameter
 
@@ -664,7 +707,7 @@ log.Printf("Greeting: %s", res.Message)
 ```go
 func (s *server) SayHello(ctx context.Context, 
   in *pb.HelloRequest) (*pb.HelloReply, error) {
-	md, _ := metadata.FromIncomingContext(ctx)
+* md, _ := metadata.FromIncomingContext(ctx)
 	for k, v := range md {
 		fmt.Printf("%s: %s\n", k, v)
 	}
@@ -704,16 +747,17 @@ func clientInterceptor(ctx context.Context, method string,
 
 	return err
 }
-```
 
-```go
+// ...
 conn, err := grpc.Dial(addr, grpc.WithInsecure()
   grpc.WithUnaryInterceptor(clientInterceptor))
 ```
 
+
+
 ???
 
-- Server-side interceptors / middleware also supported
+- gRPC has support for interceptors or middleware for both client and server side
 - Not all languages have the same level of support
   * For example there is no support for server-side middleware for Node.js
 
@@ -760,7 +804,7 @@ protoc helloworld.proto \
 ???
 
 - We generate types like normal using `protoc`
-- We Web client using `protoc` using 
+- In our web application we use the web client and the generated types to communicate with the server
 - Envoy must be used as a proxy for web clients to talk to
 - Nginx can also work
 
@@ -803,13 +847,12 @@ service Greeter {
 # CHANGE
 
 - Name of fields are less important than field numbers
-- Do not change the type or number of a field
 - Adding fields is safe
-- Do not remove a field number immediately, mark as deprecated
-- Remove field when ready, consider marking the number reserved
+- Do not change the type or number of a field
 - Do not reuse a field number unless absolutely sure
 - Be aware of the default values for the data types
-- If you need a version set it in package name
+- If you need a version set it in package name 
+  * `company.service.v1`
 
 ???
 
@@ -863,7 +906,7 @@ message HelloRequest {
 ```proto
 // v4
 message HelloRequest {
-  reserved 2;
+  reserved 1;
   reserved "name";
 
   bool reverse = 2;
@@ -874,6 +917,7 @@ message HelloRequest {
 
 ???
 
+- Do not remove a field number immediately
 - First mark it deprecated and allow for clients to update.
 - Keep server logic in place
 - Once ready to remove, remove it.
