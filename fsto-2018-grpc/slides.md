@@ -637,7 +637,7 @@ log.Printf("Greeting: %s", res.Message)
 ???
 
 - We can use metadata to send additional contextual information about calls
-- This can be used for authentication or tracing
+- This can be used for authentication, request id, or tracing
 - All implementations should support it
 - With Node.js just add it as an additional parameter
 
@@ -866,7 +866,9 @@ message HelloRequest {
 - Debuggability
 - Documentation
 - Poor feature parity between language suport
+  * Ex: Interceptors / middleware
 - Standardization and consistancy between languages
+  * Ex: timeout vs. deadline
 
 ???
 
@@ -877,7 +879,7 @@ message HelloRequest {
   * Go provide `status` API
 - gRPC-Web was generally available at the end of October
 - gRPC documentation beyond the basic tutorial is non-existant and / or scattered and is lacking in more detailed reference and guidance on more advanced topics and examples
-- There is inconsistent feature set between languages. For example Java has both client and server interceptors, while client side interceptors were only recently added to Node.js and there is no server side middleware in core at all. There are 3rd party modules to address this issue.
+- There is inconsistent feature set between languages. For example Java and Go both have client and server interceptors, while client side interceptors were only recently added to Node.js and there is no server side middleware in Node.js at all. There are 3rd party modules to address this issue.
 - Inconsistency in semantics between languages. 
   * timeout in Go vs. deadline in Node.js
 - The fact that we are dealing with binary data means we can't just inspect data accross the wire. A new tool called Channelz can be used to gather comprehensive runtime info about connections in gRPC. It is designed to help debug live programs.
@@ -892,7 +894,7 @@ message HelloRequest {
 
 ---
 
-# DEJA VU ALL OVER AGAIN
+# BUT WHAT ABOUT?
 
 - SOAP / WSDL
 - Swagger & JSON Schema
@@ -940,7 +942,7 @@ message HelloRequest {
 
 ---
 
-# GRAPHQL
+# REJOINER
 
 http://rejoiner.io
 
