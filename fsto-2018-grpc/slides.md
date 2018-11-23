@@ -667,40 +667,7 @@ request-id: [123]
 
 ???
 
-- Notes
-
----
-
-# INTERCEPTORS
-
-```go
-func clientInterceptor(ctx context.Context, method string,
-	req interface{}, reply interface{},
-  cc *grpc.ClientConn, invoker grpc.UnaryInvoker, 
-  opts ...grpc.CallOption,
-) error {
-	start := time.Now()
-
-	err := invoker(ctx, method, req, reply, cc, opts...)
-
-  fmt.Printf("Invoked RPC method=%s; Duration=%s; Error=%v\n", 
-    method, time.Since(start), err)
-
-	return err
-}
-
-// ...
-conn, err := grpc.Dial(addr, grpc.WithInsecure()
-  grpc.WithUnaryInterceptor(clientInterceptor))
-```
-
-
-
-???
-
-- gRPC has support for interceptors or middleware for both client and server side
-- Not all languages have the same level of support
-  * For example there is no support for server-side middleware for Node.js
+- Example of getting metadata on server
 
 ---
 
