@@ -201,9 +201,9 @@ And even if you take the time and get it all right...
 ???
 
 - Example of non-resourceful: 
-    * Restart some application / host
     * Encrypt some text
     * Classify an image or a sentance
+    * Restart some application / host
 
 - Maybe the same mechanisms of how we served static content is perhaps not the best way for applications to communicate to each other?
 
@@ -831,6 +831,7 @@ service Greeter {
 
 ???
 
+- Sometimes we want to use HTTP / JSON along with gRPC
 - `grpc-gateway` can be used to generate a Go stub that you then can create a go service proxy
 - `grpc-gateway` can be used to generate swagger deinition as well
 - Maps streaming APIs to newline-delimited JSON streams
@@ -844,15 +845,16 @@ service Greeter {
 
 ---
 
-# CHANGE
+# DEALING WITH CHANGE
 
 - Name of fields are less important than field numbers
 - Adding fields is safe
 - Do not change the type or number of a field
+- Deprecate a field before removal
 - Do not reuse a field number unless absolutely sure
 - Be aware of the default values for the data types
 - If you need a version set it in package name 
-  * `company.service.v1`
+  * Ex: `company.service.v1`
 
 ???
 
@@ -933,10 +935,9 @@ message HelloRequest {
 - Review API changes with normal PR process
 - Automatically test compilation, linting, etc...
 - Services version control generated code as needed
+- Be concise and consistent
 - Have a style guide
   * https://cloud.google.com/apis/design/
-- Be concise and consistent
-- Be eventful
 
 ???
 
@@ -954,48 +955,24 @@ message HelloRequest {
 - Load Balancing
 - Error Handling
 - Browser Support
-- More detailed and centralized documentation
+- Debuggability
+- Documentation
 - Poor feature parity between language suport
 - Standardization and consistancy between languages
-- Debuggability
 
 ???
 
 - Load balancing is an improving issue, Envoy, Linkerd and Nginx can all support gRPC now
 - Error handling used to be ugly and poor and has been improved
+  * Used to be just an integer status and string message
+  * Node.js errors can take metadata
+  * Go provide `status` API
 - gRPC-Web was generally available at the end of October
 - gRPC documentation beyond the basic tutorial is non-existant and / or scattered and is lacking in more detailed reference and guidance on more advanced topics and examples
 - There is inconsistent feature set between languages. For example Java has both client and server interceptors, while client side interceptors were only recently added to Node.js and there is no server side middleware in core at all. There are 3rd party modules to address this issue.
 - Inconsistency in semantics between languages. 
   * timeout in Go vs. deadline in Node.js
 - The fact that we are dealing with binary data means we can't just inspect data accross the wire. A new tool called Channelz can be used to gather comprehensive runtime info about connections in gRPC. It is designed to help debug live programs.
-
----
-
-# ERRORS
-
-- Used to be just an integer status and string message
-- Support for details has been added to some languages
-
-```go
-st := status.New(codes.ResourceExhausted, 
-  "Request limit exceeded.")
-
-ds, err := st.WithDetails(
-  &epb.QuotaFailure{
-    Violations: []*epb.QuotaFailure_Violation{{
-      Subject:     fmt.Sprintf("name:%s", in.Name),
-      Description: "Limit one greeting per person",
-    }},
-  },
-)
-return nil, ds.Err()
-```
-
-???
-
-- Node.js errors can take metadata
-- Go provide `status` API
 
 ---
 
@@ -1014,18 +991,17 @@ return nil, ds.Err()
 - JSON-RPC
 - Thrift
 - MessagePack
-- GraphQL
 - Twirp
+- GraphQL
 
 ???
 
-** SOAP / WSDL**
+**SOAP / WSDL**
 - Tied to XML (protobuf is pluggable)
-- Unnecessarily complex
-- Infexible with regards to compatibility
+- Unnecessarily complex and infexible with regards to compatibility
 - No Streaming
 
-**Swagger*
+**Swagger**
 - It is machine readable
 - Lots of tooling
 - Tied to HTTP/JSON
@@ -1040,15 +1016,15 @@ return nil, ds.Err()
 - Pretty flexible and well supported binary serialization format
 - There is RPC on top but poor for building well designed and maintainable contracts and APIs
 
+**Twirp**
+- A simpler gRPC from Twitch that works with HTTP/1
+- Good alternative if you're not comfortable with the hard HTTP2 requirement
+
 **GraphQL**
 - Interesting option for clients / frontends to query exactly the data they need
 - Human readable and schema-based with types
 - Still works over HTTP and no streaming
 - Perhaps not ideal for service <-> service communication
-
-**Twirp**
-- A simpler gRPC from Twitch that works with HTTP/1
-- Good alternative if you're not comfortable with the hard HTTP2 requirement
 
 **Future**
 
@@ -1056,7 +1032,7 @@ return nil, ds.Err()
 
 ---
 
-# REJOINER
+# GRAPHQL
 
 http://rejoiner.io
 
