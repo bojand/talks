@@ -4,6 +4,14 @@
 - `npm install && npm start`
 - follow the slides & links
 
+## 2018
+
+### Beyond REST - A guide to gRPC
+
+#### [Full Stack Totonto 2018](http://fsto.co/)
+
+[Presentation content](https://github.com/bojand/fsto-2018-grpc)
+
 ## 2017
 
 ### Practical Promises
