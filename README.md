@@ -12,6 +12,8 @@
 
 [Presentation content](https://github.com/bojand/fsto-2018-grpc)
 
+[Video](https://www.youtube.com/watch?v=JnFQlTty64A)
+
 ## 2017
 
 ### Practical Promises
